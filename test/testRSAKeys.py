@@ -7,6 +7,7 @@ Created on Thu Jan 28 21:17:37 2016
 
 from Crypto.PublicKey import RSA #to install, do 'sudo pip install pycrypto' or 'sudo pip install crypto', i installed so many things I already forgot..oops
 from Crypto import Random
+from Crypto.Hash import SHA256
 from datetime import datetime
 
 device_key = '12345' #from registered-widgets.txt, I guess it doesn't matter how fancy this is since we are encrypting it
@@ -20,6 +21,13 @@ http://www.laurentluce.com/posts/python-and-cryptography-with-pycrypto/
 random_generator = Random.new().read
 key = RSA.generate(1024, random_generator)
 #print key
+
+#try to sign the key, this code crashes my IDE...
+'''
+hash = SHA256.new(device_key).digest()
+signature = key.sign(hash, '')
+'''
+
 
 '''
 First, we extract the public key from the key pair and use it to encrypt some data. 
