@@ -1,0 +1,9 @@
+Here are some useful links for encryption
+
+The TPM has a random number generator that can be used to increase entropy with rng-tools. gnupg can take advantage of this, so it seems like a good way to generate our RSA keys would be with GPG. There is a python GPG library, and here are two very good resources I found:
+
+http://cryptotronix.com/2014/08/28/tpm-rng/
+https://pythonhosted.org/python-gnupg/
+http://www.saltycrane.com/blog/2011/10/python-gnupg-gpg-example/
+
+The first is setting up rng-tools to use the TPM, and then the second two are about using gpg. I did a test on the beaglebone generating gpg keys, without the rng-tools service running it was not able to generate a key, while with it running it only took a few seconds. 
