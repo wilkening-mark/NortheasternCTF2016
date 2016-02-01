@@ -6,4 +6,4 @@ http://cryptotronix.com/2014/08/28/tpm-rng/
 https://pythonhosted.org/python-gnupg/
 http://www.saltycrane.com/blog/2011/10/python-gnupg-gpg-example/
 
-The first is setting up rng-tools to use the TPM, and then the second two are about using gpg. I did a test on the beaglebone generating gpg keys, without the rng-tools service running it was not able to generate a key, while with it running it only took a few seconds. 
+The first is setting up rng-tools to use the TPM, and then the second two are about using gpg. I did a test on the beaglebone generating gpg keys, without the rng-tools service running it was not able to generate a key, while with it running it only took a few seconds. One way I see we could do this would be use this to generate our keys and then store them in the encrypted eeprom.
