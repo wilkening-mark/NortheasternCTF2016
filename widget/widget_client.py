@@ -69,27 +69,71 @@ class ServerConnection(object):
         Send some data to the server. The connection will be retried until the
         data is sent. Returns 1 for success, 0 for failure.
         """
+        ## NICK added here
+        ## added timestamp sent to server
+        bbbDate = subprocess.check_output(['date'])
+        rtcDate = subprocess.check_output(['hwclock', '-r', '-f', '/dev/rtc1'])
+        rtcDate = rtcDate[0:len(bbbDate)]        
+        
+        #format rtcDate
+        rtcDateParts=[]
+        #year
+        rtcDateParts.append(int(rtcDate[11:15]))
+        #month
+        rtcDateParts.append(rtcDate[7:10])
+        #day
+        rtcDateParts.append(int(rtcDate[4:6]))
+        #hour
+        tfh=0
+        if rtcDate[25]=='P':
+            tfh=12
+        rtcDateParts.append(int(rtcDate[16:18])+12)
+        #minute
+        rtcDateParts.append(int(rtcDate[19:21]))
+
+        #format bbbDate
+        bbbDateParts=[]
+        #year
+        bbbDateParts.append(int(bbbDate[24:28]))
+        #month
+        bbbDateParts.append(bbbDate[4:7])
+        #day
+        bbbDateParts.append(int(bbbDate[9:11]))
+        #hour
+        bbbDateParts.append(int(bbbDate[11:13]))
+        #minute
+        bbbDateParts.append(int(bbbDate[14:16]))
+        
+        ## added time check, if RTC on cape does not match bbb system time system will not send data
+        ## TODO: should probably check against the network time too
+        ## TODO figure out what to do about drift/seconds
+       
+               
         data_dict['device_key'] = DEVICE_KEY
         data_dict['device_id'] = self.device_id
+        data_dict['timestamp'] = bbbDateParts
         data = json.dumps(data_dict)
+			        
+        if bbbDateParts==rtcDateParts:
+            while True:
+                self.connect()
 
-        while True:
-            self.connect()
+                try:
+                    self.conn.sendall(data)
+                    response = self.conn.recv(4096)
+                    d = json.loads(response)
 
-            try:
-                self.conn.sendall(data)
-                response = self.conn.recv(4096)
-                d = json.loads(response)
+                    if 'flag' in d:
+                        self.logger.info('Got flag "%s"' % d['flag'])
 
-                if 'flag' in d:
-                    self.logger.info('Got flag "%s"' % d['flag'])
-
-                return d['success']
-            except socket.error:
-                self.conn = None
-            except (ValueError, TypeError, KeyError):
-                # JSON decoding errors
-                return 0
+                    return d['success']
+                except socket.error:
+                    self.conn = None
+                except (ValueError, TypeError, KeyError):
+                    # JSON decoding errors
+                    return 0
+        else:
+            self.logger.info("CC RTC time doesn't match BBB time, no data sent to server")
 
     def register_device(self):
         d = {'type' : 'register_device'}
