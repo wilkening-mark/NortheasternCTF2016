@@ -1,6 +1,7 @@
 from twisted.internet import reactor, protocol
 import json
 import os
+import subprocess
 
 
 MASTER_PIN = '12345678'
@@ -58,7 +59,23 @@ class DoorServer(protocol.Protocol):
         # TODO:  Should verify that the json object has all the fields that we expect :)
 
         flag = None
-
+        localDate = subprocess.check_output(['date'])
+        #format localDate
+        localDateParts=[]
+        #year
+        localDateParts.append(int(localDate[24:28]))
+        #month
+        localDateParts.append(localDate[4:7])
+        #day
+        localDateParts.append(int(localDate[9:11]))
+        #hour
+        localDateParts.append(int(localDate[11:13]))
+        #minute
+        localDateParts.append(int(localDate[14:16]))
+        if request["timestamp"] != localDateParts:
+            self.send_response(0)
+            return
+        
         if request["type"] == 'register_device':
             print "Register request (%s)" % repr(request)
             add_reg_request(request['device_key'], request['device_id'])
