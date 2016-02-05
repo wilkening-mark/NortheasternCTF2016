@@ -29,28 +29,28 @@ class Widget(object):
         # checks if valid JSON
         try:
             data = json.loads(json_str)
-        except ValueError, e:
+        except ValueError:
             raise ValueError('ValueError: Invalid JSON Values')
         # Checks device_id for type int
         if not isinstance(data.get('device_id', None), int):
-            raise TypeError('Invalid type {!r}, expected int'.format(x))
-        else
+            raise TypeError('Invalid type {!r}, expected int')
+        else:
             self.device_id = data.get('device_id', None)
         # Checks pin for type int
         if not isinstance(data.get('pin', None), int):
-            raise TypeError('Invalid type {!r}, expected int'.format(x))
-        else
+            raise TypeError('Invalid type {!r}, expected int')
+        else:
             self.device_id = data.get('pin', None)
         # Checks flag for type String
         if not isinstance(data.get('flag', None), str):
-            raise TypeError('Invalid type {!r}, expected int'.format(x))
-        else
+            raise TypeError('Invalid type {!r}, expected int')
+        else:
             self.device_id = data.get('flag', None)
         # Checks device_id for type int
-         if not isinstance(data.get('device_key', None), int):
-             raise TypeError('Invalid type {!r}, expected int'.format(x))
-         else
-             self.device_id = data.get('device_key', None)
+        if not isinstance(data.get('device_key', None), int):
+             raise TypeError('Invalid type {!r}, expected int')
+        else:
+            self.device_id = data.get('device_key', None)
 
 
 # TODO: Make this thread-safe and/or figure out what will happen when multiple requests come in simultaneously
