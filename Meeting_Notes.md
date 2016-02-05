@@ -25,3 +25,14 @@
 	- Nick and Victoria - work on encripting server packets
 	- Look at list, prioritize, assign tasks (Sam, Erin, Emily) Mon/Tues
 
+# Feb 5  
+	- Mark - RSA & Encription - working on merging w/Nick's stuff - Prevent multiple packets @ once 
+	- Kim - JSON, Protect packets - valid data
+	- Went through Attacks/Patch doc, status
+	- Ran BBB (Mark, Ben, Kim)  tested some of the code
+	- For upcoming week - any YELLOW boxes should be tested / merged if posible 
+	- Merge MITRE's code into our branch (done)
+	- Figure out how to run with the new stuff (Kim)
+	- Knowledge transfer (So we all know how to run the BBB, notes about best practices, debug stuff)
+
+
