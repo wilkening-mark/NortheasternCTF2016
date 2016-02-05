@@ -2,7 +2,6 @@ from twisted.internet import reactor, protocol
 import json
 import os
 import subprocess
-import typesafety
 
 MASTER_PIN = '12345678'
 REGISTERED_DEVICES = {}
