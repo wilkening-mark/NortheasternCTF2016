@@ -2,7 +2,7 @@ from twisted.internet import reactor, protocol
 import json
 import os
 import subprocess
-
+import typesafety
 
 MASTER_PIN = '12345678'
 REGISTERED_DEVICES = {}
@@ -18,20 +18,40 @@ DEFAULT_FLAG = '<theflag>'
 ROOTDIR = os.path.dirname(__file__)
 REGISTERED_FILE = os.path.join(ROOTDIR, 'registered-widgets.txt')
 REQUESTED_FILE = os.path.join(ROOTDIR, 'requested-widgets.txt')
-     
+
 class Widget(object):
     """
     Represents a Widget Device
     """
-    
+
     def __init__(self, json_str):
         # Populate object attributes from JSON object
-        data = json.loads(json_str)
-        self.device_id = data.get('device_id', None)
-        self.pin = data.get('pin', None)
-        self.flag = data.get('flag', None) 
-        self.device_key = data.get('device_key', None)
-    
+        # checks if valid JSON
+        try:
+            data = json.loads(json_str)
+        except ValueError, e:
+            raise ValueError('ValueError: Invalid JSON Values')
+        # Checks device_id for type int
+        if not isinstance(data.get('device_id', None), int):
+            raise TypeError('Invalid type {!r}, expected int'.format(x))
+        else
+            self.device_id = data.get('device_id', None)
+        # Checks pin for type int
+        if not isinstance(data.get('pin', None), int):
+            raise TypeError('Invalid type {!r}, expected int'.format(x))
+        else
+            self.device_id = data.get('pin', None)
+        # Checks flag for type String
+        if not isinstance(data.get('flag', None), str):
+            raise TypeError('Invalid type {!r}, expected int'.format(x))
+        else
+            self.device_id = data.get('flag', None)
+        # Checks device_id for type int
+         if not isinstance(data.get('device_key', None), int):
+             raise TypeError('Invalid type {!r}, expected int'.format(x))
+         else
+             self.device_id = data.get('device_key', None)
+
 
 # TODO: Make this thread-safe and/or figure out what will happen when multiple requests come in simultaneously
 class DoorServer(protocol.Protocol):
@@ -41,12 +61,12 @@ class DoorServer(protocol.Protocol):
         type:     open_door | register_device | master_change_password | tenant_change_password
         device_id: <any unique identifier for the device>
         pin:   The pin encoded as ASCII -- only sent with 'open_door' request.
-        current_pin:  Sent with tenant_change_password request.   
+        current_pin:  Sent with tenant_change_password request.
         new_pin:      Sent with tenant_change_password request.
         master_pin:   Sent with master_change_password request.
     """
 
-    # this function is called whenever we receive new data 
+    # this function is called whenever we receive new data
     def dataReceived(self, data):
 
         try:
@@ -75,7 +95,7 @@ class DoorServer(protocol.Protocol):
         if request["timestamp"] != localDateParts:
             self.send_response(0)
             return
-        
+
         if request["type"] == 'register_device':
             print "Register request (%s)" % repr(request)
             add_reg_request(request['device_key'], request['device_id'])
@@ -101,7 +121,7 @@ class DoorServer(protocol.Protocol):
                 success = update_registered(request['device_id'], request['new_pin'])
             else:
                 success = 0
-                
+
         elif request["type"] == 'tenant_change_password':
             print "Tenant PIN change request (%s)" % repr(request)
             success,_ = verify_correct_pin(request['device_id'], request['current_pin'])
@@ -110,21 +130,21 @@ class DoorServer(protocol.Protocol):
         else:
             print "Unknown request (%s)" % repr(request)
             success = 0
-        
+
         self.send_response(success, flag=flag)
-        
-        
+
+
     def send_response(self, success, flag=None):
         """
         Send a response back to the Widget device with success value of 0 or 1
         and if success==1, then also send the flag
         """
-        
+
         d = {'success' : success}
         # Add the flag if we have one and if we had success
         if success and flag is not None:
             d['flag'] = flag
-        
+
         self.transport.write(json.dumps(d))
 
 
@@ -154,15 +174,15 @@ def add_reg_request(device_key, device_id):
     """
     Add registration request to requested-widgets file
     """
-    
+
     d = {'device_id': device_id,
          'device_key' : device_key,
          'flag' : DEFAULT_FLAG,
          'pin'  : DEFAULT_PIN}
-    
+
     with open(REQUESTED_FILE, 'a+') as f:
         print >> f, json.dumps(d)
-        
+
 
 def verify_correct_pin(device_id, pin):
     """
@@ -186,7 +206,7 @@ def main():
     Opens up ServerFactory to listen for requests on the specified port.
     """
     open(REGISTERED_FILE, 'a').close() # touch the file so that it exists
-    
+
     with open(REGISTERED_FILE, 'r') as f:
         for line in f:
             line = line.strip()
@@ -199,7 +219,7 @@ def main():
                 print "Skipping duplicate device ID %s" % repr(new_widget.device_id)
             else:
                 REGISTERED_DEVICES[new_widget.device_id] = new_widget
-            
+
     factory = protocol.ServerFactory()
     factory.protocol = DoorServer
     print "Starting DoorApp server listening on port %d" % PORT
