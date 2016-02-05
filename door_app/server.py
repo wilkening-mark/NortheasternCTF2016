@@ -33,22 +33,22 @@ class Widget(object):
             raise ValueError('ValueError: Invalid JSON Values')
         # Checks device_id for type int
         if not isinstance(data.get('device_id', None), int):
-            raise TypeError('Invalid type {!r}, expected int')
+            raise TypeError('Invalid type, expected int')
         else:
             self.device_id = data.get('device_id', None)
         # Checks pin for type int
         if not isinstance(data.get('pin', None), int):
-            raise TypeError('Invalid type {!r}, expected int')
+            raise TypeError('Invalid type, expected int')
         else:
             self.device_id = data.get('pin', None)
         # Checks flag for type String
         if not isinstance(data.get('flag', None), str):
-            raise TypeError('Invalid type {!r}, expected int')
+            raise TypeError('Invalid type, expected int')
         else:
             self.device_id = data.get('flag', None)
         # Checks device_id for type int
         if not isinstance(data.get('device_key', None), int):
-             raise TypeError('Invalid type {!r}, expected int')
+             raise TypeError('Invalid type, expected int')
         else:
             self.device_id = data.get('device_key', None)
 
