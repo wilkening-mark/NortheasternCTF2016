@@ -5,10 +5,22 @@ import smbus
 import subprocess
 import time
 import threading
+import random
 from uuid import getnode as get_mac
 
-# This is a (bad) example of the "something you have" portion of the authentication.
-DEVICE_KEY = '12345'
+# This is creates a 9 digit long random device key
+DEVICE_KEY = ""
+
+x=1
+while x<10:
+number = random.randint(0,9)
+DEVICE_KEY += number
+x+=1
+
+
+
+
+
 
 class AVRChip(object):
     """
@@ -138,7 +150,7 @@ class Logger(object):
         """
         self.listen_socket.bind(('', Logger.LOGGER_PORT))
         self.listen_socket.listen(1)
-        
+
         while True:
             try:
                 conn, _ = self.listen_socket.accept()
@@ -205,7 +217,7 @@ def main():
 
         while (True):
             c = avr.read_key()
-            
+
             # read_key() will always return a character. NULL means no new
             # key presses.
             if c == '\0':
@@ -224,7 +236,7 @@ def main():
                 # Otherwise, the # character always terminates the input.
                 if buf in ('*#', '*#*#', '*#*#*#'):
                     continue
-                
+
                 if buf == '*#*#*#*#':
                     if server.register_device():
                         logger.info('Registration successful')
@@ -261,7 +273,7 @@ def main():
                         logger.error('Invalid entry')
                         buf = ""
                         continue
-                    
+
                     master_password = buf[:8]
                     new_password = buf[9:-1]
 
