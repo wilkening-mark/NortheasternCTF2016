@@ -78,20 +78,17 @@ class DoorServer(protocol.Protocol):
         # TODO:  Should verify that the json object has all the fields that we expect :)
 
         flag = None
-        localDate = subprocess.check_output(['date'])
-        #format localDate
-        localDateParts=[]
-        #year
-        localDateParts.append(int(localDate[24:28]))
-        #month
-        localDateParts.append(localDate[4:7])
-        #day
-        localDateParts.append(int(localDate[9:11]))
-        #hour
-        localDateParts.append(int(localDate[11:13]))
-        #minute
-        localDateParts.append(int(localDate[14:16]))
-        if request["timestamp"] != localDateParts:
+        localDateRaw = subprocess.check_output(['date'])
+        netDateRaw = subprocess.check_output(['ntpdate', '-q', 'time-c.nist.gov'])
+        localDate = str(localDateRaw[24:28]) + str(localDateRaw[4:7]) + str(localDateRaw[9:11]) + str(localDateRaw[11:13]) + str(localDateRaw[14:16])
+        netDateRaw = netDateRaw[62:77]
+        netDate = '2016' + str(netDateRaw[3:6]) + str(netDateRaw[0:2]) + str(netDateRaw[7:9]) + str(netDateRaw[10:12])
+        if netDate[7] == ' ':
+            netDate = netDate[0:7] + '0' + netDate[8:]
+        if localDate[7] == ' ':
+            localDate = localDate[0:7] + '0' + netDate[8:]
+                
+        if request["timestamp"] != localDate:
             self.send_response(0)
             return
 

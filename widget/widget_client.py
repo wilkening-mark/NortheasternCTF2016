@@ -71,38 +71,30 @@ class ServerConnection(object):
         """
         ## NICK added here
         ## added timestamp sent to server
-        bbbDate = subprocess.check_output(['date'])
-        rtcDate = subprocess.check_output(['hwclock', '-r', '-f', '/dev/rtc1'])
-        rtcDate = rtcDate[0:len(bbbDate)]        
+        netDateRaw = subprocess.check_output(['ntpdate', '-q', 'time-c.nist.gov'])
+        bbbDateRaw = subprocess.check_output(['date'])
+        rtcDateRaw = subprocess.check_output(['hwclock', '-r', '-f', '/dev/rtc1'])
+        rtcDateRaw = rtcDate[0:len(bbbDate)]    
         
+        ## timestamp format year>month>day>hour>minute
+        ## netdate doesn't have year... hardcoding 2016
+        
+        #format netDate
+        netDateRaw = netDateRaw[62:77]
+        netDate = '2016' + str(netDateRaw[3:6]) + str(netDateRaw[0:2]) + str(netDateRaw[7:9]) + str(netDateRaw[10:12])
+        if netDate[7] == ' ':
+            netDate = netDate[0:7] + '0' + netDate[8:]
         #format rtcDate
-        rtcDateParts=[]
-        #year
-        rtcDateParts.append(int(rtcDate[11:15]))
-        #month
-        rtcDateParts.append(rtcDate[7:10])
-        #day
-        rtcDateParts.append(int(rtcDate[4:6]))
-        #hour
+        rtcDate = str(rtcDateRaw[11:15]) + str(rtcDateRaw[7:10]) + str(rtcDateRaw[4:6])
         tfh=0
-        if rtcDate[25]=='P':
+        if rtcDateRaw[25]=='P':
             tfh=12
-        rtcDateParts.append(int(rtcDate[16:18])+12)
-        #minute
-        rtcDateParts.append(int(rtcDate[19:21]))
+        rtcDate = rtcDate + str(int(rtcDateRaw[16:18])+tfh) + str(rtcDateRaw[19:21])
 
         #format bbbDate
-        bbbDateParts=[]
-        #year
-        bbbDateParts.append(int(bbbDate[24:28]))
-        #month
-        bbbDateParts.append(bbbDate[4:7])
-        #day
-        bbbDateParts.append(int(bbbDate[9:11]))
-        #hour
-        bbbDateParts.append(int(bbbDate[11:13]))
-        #minute
-        bbbDateParts.append(int(bbbDate[14:16]))
+        bbbDate = str(bbbDateRaw[24:28]) + str(bbbDateRaw[4:7]) + str(bbbDateRaw[9:11]) + str(bbbDateRaw[11:13]) + str(bbbDateRaw[14:16])
+        if bbbDate[7] == ' ':
+            bbbDate = bbbDate[0:7] + '0' + bbbDate[8:]
         
         ## added time check, if RTC on cape does not match bbb system time system will not send data
         ## TODO: should probably check against the network time too
@@ -111,10 +103,10 @@ class ServerConnection(object):
                
         data_dict['device_key'] = DEVICE_KEY
         data_dict['device_id'] = self.device_id
-        data_dict['timestamp'] = bbbDateParts
+        data_dict['timestamp'] = bbbDate
         data = json.dumps(data_dict)
 			        
-        if bbbDateParts==rtcDateParts:
+        if (bbbDate==rtcDate) and (bbbDate == netDate):
             while True:
                 self.connect()
 
