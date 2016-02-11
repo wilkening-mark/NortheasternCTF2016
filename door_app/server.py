@@ -39,18 +39,17 @@ class Widget(object):
         if not isinstance(data.get('pin', None), int):
             raise TypeError('Invalid type, expected int')
         else:
-            self.device_id = data.get('pin', None)
+            self.pin = data.get('pin', None)
         # Checks flag for type String
         if not isinstance(data.get('flag', None), str):
             raise TypeError('Invalid type, expected int')
         else:
-            self.device_id = data.get('flag', None)
-        # Checks device_id for type int
+            self.flag = data.get('flag', None)
+        # Checks device_key for type int
         if not isinstance(data.get('device_key', None), int):
              raise TypeError('Invalid type, expected int')
         else:
-            self.device_id = data.get('device_key', None)
-
+            self.device_key = data.get('device_key', None)
 
 # TODO: Make this thread-safe and/or figure out what will happen when multiple requests come in simultaneously
 class DoorServer(protocol.Protocol):
