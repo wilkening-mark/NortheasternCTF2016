@@ -34,5 +34,7 @@
 	- Merge MITRE's code into our branch (done)
 	- Figure out how to run with the new stuff (Kim)
 	- Knowledge transfer (So we all know how to run the BBB, notes about best practices, debug stuff)
-
-
+#Feb 9th
+	-Nick and Victoria: pulling timestamps from BBB, network and formatting the dates 
+	-if the timestamps match, then continue forward with connection 		-after working on this, we see the need for creating unit testing for our code because it's easy for things to break and hard to pinpoint the source
+	-once the timestamp code is working, Nick and Victoria will move forward with encrypting via the ECC 
