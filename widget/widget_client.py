@@ -75,9 +75,9 @@ class ServerConnection(object):
         ## TODO: should probably check against the network time too
         ## TODO figure out what to do about drift/seconds
 
-        bb_date = get_bb_date()
-        network_date = get_network_date()
-        rtc_date = get_rtc_date()
+        bb_date = self.get_bb_date()
+        network_date = self.get_network_date()
+        rtc_date = self.get_rtc_date()
 
         data_dict['device_key'] = DEVICE_KEY
         data_dict['device_id'] = self.device_id
@@ -109,19 +109,19 @@ class ServerConnection(object):
 
     # grabs timestamps from BB
     # formats to the same structure '%y%b%d%H:%M:%S'
-    def get_bb_date():
+    def get_bb_date(self):
         # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
         bb_date = subprocess.check_output(['date'])
 
         # Format to '2016Feb0921:28:23'
         bb_date = datetime.strptime(bb_date, '%a %b  %d %H:%M:%S %Z %Y')
-        bb_date = datetime.strftime(bb_date, '%y%b%d%H:%M:%S')
+        bb_date = datetime.strftime(bb_date, '%Y%b%d%H:%M:%S')
 
         return bb_date
 
     # grabs timestamps from network
     # formats to the same structure '%y%b%d%H:%M:%S'
-    def get_network_date():
+    def get_network_date(self):
         # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
         network_date = subprocess.check_output(['ntpdate', '-q', 'time-c.nist.gov'])
         # network_date doesn't have a year, append to end
@@ -129,20 +129,20 @@ class ServerConnection(object):
 
         # Format to '2016Feb0921:28:23'
         network_date = datetime.strptime(network_date, '%a %b  %d %H:%M:%S %Z %Y')
-        network_date = datetime.strftime(network_date, '%y%b%d%H:%M:%S')
+        network_date = datetime.strftime(network_date, '%Y%b%d%H:%M:%S')
 
         return network_date
 
     # grabs timestamps from CryptoCape RTC
     # formats to the same structure '%y%b%d%H:%M:%S'
-    def get_rtc_date():
+    def get_rtc_date(self):
         # Expected format: 'Tue 09 Feb 2016 09:29:02 PM UTC -1.005808 second'
         rtc_date = subprocess.check_output(['hwclock', '-r', '-f', '/dev/rtc1'])
         # Parse out '-1.005808 seconds' cause the module wont know what to do with it
         rtc_date = rtc_date[0:31]
         # Format to '2016Feb0921:28:23'
         rtc_date = datetime.strptime(rtc_date, '%a %d %b %Y %H:%M:%S %p %Z')
-        rtc_date = datetime.strftime(rtc_date, '%y%b%d%H:%M:%S')
+        rtc_date = datetime.strftime(rtc_date, '%Y%b%d%H:%M:%S')
 
     def register_device(self):
         d = {'type' : 'register_device'}

@@ -84,7 +84,7 @@ class DoorServer(protocol.Protocol):
 
         flag = None
 
-        if (request["timestamp"] == get_bb_date()) and (request["timestamp"] == get_network_date()):
+        if (request["timestamp"] == self.get_bb_date()) and (request["timestamp"] == self.get_network_date()):
             if request["type"] == 'register_device':
                 print "Register request (%s)" % repr(request)
                 add_reg_request(request['device_key'], request['device_id'])
@@ -129,19 +129,19 @@ class DoorServer(protocol.Protocol):
 
     # grabs timestamps from BB
     # formats to the same structure '%y%b%d%H:%M:%S'
-    def get_bb_date():
+    def get_bb_date(self):
         # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
         bb_date = subprocess.check_output(['date'])
 
         # Format to '2016Feb0921:28:23'
         bb_date = datetime.strptime(bb_date, '%a %b  %d %H:%M:%S %Z %Y')
-        bb_date = datetime.strftime(bb_date, '%y%b%d%H:%M:%S')
+        bb_date = datetime.strftime(bb_date, '%Y%b%d%H:%M:%S')
 
         return bb_date
 
     # grabs timestamps from network
     # formats to the same structure '%y%b%d%H:%M:%S'
-    def get_network_date():
+    def get_network_date(self):
         # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
         network_date = subprocess.check_output(['ntpdate', '-q', 'time-c.nist.gov'])
         # network_date doesn't have a year, append to end
@@ -149,19 +149,9 @@ class DoorServer(protocol.Protocol):
 
         # Format to '2016Feb0921:28:23'
         network_date = datetime.strptime(network_date, '%a %b  %d %H:%M:%S %Z %Y')
-        network_date = datetime.strftime(network_date, '%y%b%d%H:%M:%S')
+        network_date = datetime.strftime(network_date, '%Y%b%d%H:%M:%S')
 
         return network_date
-    
-    def format_date(date):
-        #this function is for unit testing to ensure that we are formatting dates correctly
-        bb_date = datetime.strptime(date, '%a %b  %d %H:%M:%S %Z %Y')
-        bb_date = datetime.strftime(date, '%y%b%d%H:%M:%S')
-        
-        network_date = datetime.strptime(date, '%a %b  %d %H:%M:%S %Z %Y')
-        network_date = datetime.strftime(date, '%y%b%d%H:%M:%S')
-        
-        return bb_date, network_date
 
     def send_response(self, success, flag=None):
         """
@@ -211,7 +201,7 @@ def add_reg_request(device_key, device_id):
 
     with open(REQUESTED_FILE, 'a+') as f:
         print >> f, json.dumps(d)
-        
+
     return d
 
 
