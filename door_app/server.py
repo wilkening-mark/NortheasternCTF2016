@@ -132,6 +132,8 @@ class DoorServer(protocol.Protocol):
     def get_bb_date(self):
         # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
         bb_date = subprocess.check_output(['date'])
+        #the linux command will return an escape character at the end of the string, we don't want that
+        bb_date = bb_date[0:28]
 
         # Format to '2016Feb0921:28:23'
         bb_date = datetime.strptime(bb_date, '%a %b %d %H:%M:%S %Z %Y')

@@ -8,6 +8,7 @@ Created on Thu Feb 11 17:57:12 2016
 import unittest 
 #import server
 from datetime import datetime
+import subprocess
 
 class ServerTest(unittest.TestCase):
     '''
@@ -30,9 +31,10 @@ class ServerTest(unittest.TestCase):
         #check bad JSON values
         self.assertRaises(ValueError, server.add_reg_request(request['123456'],request['no, you suck']))    
         '''
-    def get_bb_date(self, date):
+    def get_bb_date(self):
         # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
-        bb_date = date
+        bb_date = subprocess.check_output(['date'])
+        bb_date = bb_date[0:28]
 
         # Format to '2016Feb0921:28:23'
         bb_date = datetime.strptime(bb_date, '%a %b %d %H:%M:%S %Z %Y')
@@ -59,7 +61,7 @@ class ServerTest(unittest.TestCase):
     #check if timestamps are formatted properly 
     def test_bb_format_date(self):
         #checking against good date value
-        self.assertEqual('2016Feb1211:24:25', self.get_bb_date('Fri Feb 12 11:24:25 EST 2016'))
+        self.assertEqual('2016Feb1211:24:25', self.get_bb_date())
         
     def test_network_format_date(self):
         self.assertEqual('2016Feb1211:34:24', self.get_network_date('12 Feb 11:34:24 ntpdate[8040]: adjust time server 129.6.15.30 offset 0.015589 sec'))      

@@ -112,6 +112,8 @@ class ServerConnection(object):
     def get_bb_date(self):
         # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
         bb_date = subprocess.check_output(['date'])
+        #parsing to not pull the escape character
+        bb_date = bb_date[0:28]
 
         # Format to '2016Feb0921:28:23'
         bb_date = datetime.strptime(bb_date, '%a %b %d %H:%M:%S %Z %Y')
