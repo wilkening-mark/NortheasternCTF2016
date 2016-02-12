@@ -2,6 +2,7 @@ from twisted.internet import reactor, protocol
 import json
 import os
 import subprocess
+import Queue
 
 MASTER_PIN = '12345678'
 REGISTERED_DEVICES = {}
@@ -31,22 +32,22 @@ class Widget(object):
         except ValueError:
             raise ValueError('ValueError: Invalid JSON Values')
         # Checks device_id for type int
-        if not isinstance(data.get('device_id', None), int):
+        if not isinstance(data.get('device_id', None), int) and not isinstance(data.get('device_id', None), unicode):
             raise TypeError('Invalid type, expected int')
         else:
             self.device_id = data.get('device_id', None)
         # Checks pin for type int
-        if not isinstance(data.get('pin', None), int):
+        if not isinstance(data.get('pin', None), int) and not isinstance(data.get('pin', None), unicode):
             raise TypeError('Invalid type, expected int')
         else:
             self.pin = data.get('pin', None)
         # Checks flag for type String
-        if not isinstance(data.get('flag', None), str):
+        if not isinstance(data.get('flag', None), str) and not isinstance(data.get('flag', None), unicode):
             raise TypeError('Invalid type, expected int')
         else:
             self.flag = data.get('flag', None)
         # Checks device_key for type int
-        if not isinstance(data.get('device_key', None), int):
+        if not isinstance(data.get('device_key', None), int) and not isinstance(data.get('device_key', None), unicode):
              raise TypeError('Invalid type, expected int')
         else:
             self.device_key = data.get('device_key', None)
@@ -66,6 +67,11 @@ class DoorServer(protocol.Protocol):
 
     # this function is called whenever we receive new data
     def dataReceived(self, data):
+
+        if rate_limit_full():
+            print "Rate limit reached."
+            self.send_response(0)
+            return
 
         try:
             request = json.loads(data)
@@ -196,7 +202,42 @@ def verify_correct_pin(device_id, pin):
     else:
         return (0, None)
 
+def create_access_table():
+    """
+    Creates a table that lists the last attempts to unlock the door.
+    This table stores the times to limit the possibility of brute force.
+    """
+    REQUEST_LIMIT_PER_HOUR = 60
+    
+    access_table = Queue.Queue(maxsize = REQUEST_LIMIT_PER_HOUR)
 
+def push_access_time():
+    access_table.put(time.time())
+
+def rate_limit_full():
+    """
+    Checks the amount of unlocks that have been done in the last hour,
+    removing them from the queue if they are older. If fewer than the limit
+    (the size of the queue) have been done, goes through with the unlock if valid.
+    """
+    HOURS = 1
+    MINUTES_IN_HOUR = 60
+    SECONDS_IN_MINUTE = 60
+
+    if access_table.full():
+
+        while time.time() - access_table.queue[0] > HOURS * MINUTES_IN_HOUR * SECONDS_IN_MINUTE:
+            access_table.get()
+
+        if access_table.full():
+            return True
+        else:
+            push_access_time()
+            return False
+            
+    else:
+        push_access_time()
+        return False
 
 def main():
     """
@@ -204,6 +245,8 @@ def main():
     Opens up ServerFactory to listen for requests on the specified port.
     """
     open(REGISTERED_FILE, 'a').close() # touch the file so that it exists
+
+    create_access_table()
 
     with open(REGISTERED_FILE, 'r') as f:
         for line in f:
