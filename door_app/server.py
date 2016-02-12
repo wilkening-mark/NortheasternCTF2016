@@ -144,6 +144,7 @@ class DoorServer(protocol.Protocol):
     def get_network_date(self):
         # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
         network_date = subprocess.check_output(['ntpdate', '-q', 'time-c.nist.gov'])
+        network_date = network_date[0:15]
         # network_date doesn't have a year, append to end
         network_date = network_date + ' 2016'
 

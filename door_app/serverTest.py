@@ -44,7 +44,7 @@ class ServerTest(unittest.TestCase):
         
     def get_network_date(self, date):
         # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
-        network_date = date
+        network_date = date[0:15]
         # network_date doesn't have a year, append to end
         network_date = network_date + ' 2016'
 
@@ -62,7 +62,7 @@ class ServerTest(unittest.TestCase):
         self.assertEqual('2016Feb1211:24:25', self.get_bb_date('Fri Feb 12 11:24:25 EST 2016'))
         
     def test_network_format_date(self):
-        self.assertEqual('2016Feb1211:26:13', self.get_network_date('12 Feb 11:26:13'))      
+        self.assertEqual('2016Feb1211:34:24', self.get_network_date('12 Feb 11:34:24 ntpdate[8040]: adjust time server 129.6.15.30 offset 0.015589 sec'))      
         
     #can add another test to assertRaises
            
