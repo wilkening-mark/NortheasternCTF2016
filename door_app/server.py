@@ -2,6 +2,7 @@ from twisted.internet import reactor, protocol
 import json
 import os
 import subprocess
+from datetime import datetime
 
 MASTER_PIN = '12345678'
 REGISTERED_DEVICES = {}
@@ -151,7 +152,16 @@ class DoorServer(protocol.Protocol):
         network_date = datetime.strftime(network_date, '%y%b%d%H:%M:%S')
 
         return network_date
-
+    
+    def format_date(date):
+        #this function is for unit testing to ensure that we are formatting dates correctly
+        bb_date = datetime.strptime(date, '%a %b  %d %H:%M:%S %Z %Y')
+        bb_date = datetime.strftime(date, '%y%b%d%H:%M:%S')
+        
+        network_date = datetime.strptime(date, '%a %b  %d %H:%M:%S %Z %Y')
+        network_date = datetime.strftime(date, '%y%b%d%H:%M:%S')
+        
+        return bb_date, network_date
 
     def send_response(self, success, flag=None):
         """
@@ -201,6 +211,8 @@ def add_reg_request(device_key, device_id):
 
     with open(REQUESTED_FILE, 'a+') as f:
         print >> f, json.dumps(d)
+        
+    return d
 
 
 def verify_correct_pin(device_id, pin):

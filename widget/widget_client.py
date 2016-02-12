@@ -6,6 +6,7 @@ import subprocess
 import time
 import threading
 from uuid import getnode as get_mac
+from datetime import datetime
 
 # This is a (bad) example of the "something you have" portion of the authentication.
 DEVICE_KEY = '12345'
