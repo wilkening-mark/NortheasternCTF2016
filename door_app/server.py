@@ -30,26 +30,30 @@ class Widget(object):
             data = json.loads(json_str)
         except ValueError:
             raise ValueError('ValueError: Invalid JSON Values')
-        # Checks device_id for type int
-        if not isinstance(data.get('device_id', None), int):
-            raise TypeError('Invalid type, expected int')
-        else:
-            self.device_id = data.get('device_id', None)
-        # Checks pin for type int
-        if not isinstance(data.get('pin', None), int):
-            raise TypeError('Invalid type, expected int')
-        else:
-            self.pin = data.get('pin', None)
-        # Checks flag for type String
-        if not isinstance(data.get('flag', None), str):
-            raise TypeError('Invalid type, expected int')
-        else:
-            self.flag = data.get('flag', None)
+
+        # Cast device_id as type int, if fails, raise error
+        try:
+            self.device_id = int(data.get('device_id', None))
+        except:
+            raise TypeError('Cannot cast as int')
+
+        # Cast pin as type int
+        try:
+            self.pin = int(data.get('pin', None))
+        except:
+            raise TypeError('Cannot cast as int')
+
+        # Cast flag as type String
+        try:
+            self.flag = str(data.get('flag', None))
+        except:
+            raise TypeError('Cannot cast as String')
+
         # Checks device_key for type int
-        if not isinstance(data.get('device_key', None), int):
-             raise TypeError('Invalid type, expected int')
-        else:
-            self.device_key = data.get('device_key', None)
+        try:
+            self.device_key = int(data.get('device_key', None))
+        except:
+            raise TypeError('Cannot cast as int')
 
 
 # TODO: Make this thread-safe and/or figure out what will happen when multiple requests come in simultaneously
