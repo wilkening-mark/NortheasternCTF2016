@@ -134,7 +134,7 @@ class DoorServer(protocol.Protocol):
         bb_date = subprocess.check_output(['date'])
 
         # Format to '2016Feb0921:28:23'
-        bb_date = datetime.strptime(bb_date, '%a %b  %d %H:%M:%S %Z %Y')
+        bb_date = datetime.strptime(bb_date, '%a %b %d %H:%M:%S %Z %Y')
         bb_date = datetime.strftime(bb_date, '%Y%b%d%H:%M:%S')
 
         return bb_date
@@ -147,8 +147,8 @@ class DoorServer(protocol.Protocol):
         # network_date doesn't have a year, append to end
         network_date = network_date + ' 2016'
 
-        # Format to '2016Feb0921:28:23'
-        network_date = datetime.strptime(network_date, '%a %b  %d %H:%M:%S %Z %Y')
+        # Format to '2016Feb0921:28:23' 
+        network_date = datetime.strptime(network_date, '%d %b %H:%M:%S %Y')
         network_date = datetime.strftime(network_date, '%Y%b%d%H:%M:%S')
 
         return network_date
