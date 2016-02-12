@@ -196,12 +196,17 @@ class Logger(object):
         self.listen_socket.close()
         self.thread.join()
 
+"""
+this is the netcat stuff that I think we should be able to get rid of to prevent listening in - Erin
+instead of undefining message - we can just have it not send the message? 
+"""
     def message(self, msg):
         bad_conns = []
 
         for conn in self.conns:
             try:
                 conn.sendall(msg + "\n")
+                ## get rid of msg here? 
             except socket.error:
                 bad_conns.append(conn)
 
