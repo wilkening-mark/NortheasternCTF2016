@@ -69,44 +69,21 @@ class ServerConnection(object):
         Send some data to the server. The connection will be retried until the
         data is sent. Returns 1 for success, 0 for failure.
         """
-        ## NICK added here
-        ## added timestamp sent to server
-        netDateRaw = subprocess.check_output(['ntpdate', '-q', 'time-c.nist.gov'])
-        bbbDateRaw = subprocess.check_output(['date'])
-        rtcDateRaw = subprocess.check_output(['hwclock', '-r', '-f', '/dev/rtc1'])
-        rtcDateRaw = rtcDate[0:len(bbbDate)]    
-        
-        ## timestamp format year>month>day>hour>minute
-        ## netdate doesn't have year... hardcoding 2016
-        
-        #format netDate
-        netDateRaw = netDateRaw[62:77]
-        netDate = '2016' + str(netDateRaw[3:6]) + str(netDateRaw[0:2]) + str(netDateRaw[7:9]) + str(netDateRaw[10:12])
-        if netDate[7] == ' ':
-            netDate = netDate[0:7] + '0' + netDate[8:]
-        #format rtcDate
-        rtcDate = str(rtcDateRaw[11:15]) + str(rtcDateRaw[7:10]) + str(rtcDateRaw[4:6])
-        tfh=0
-        if rtcDateRaw[25]=='P':
-            tfh=12
-        rtcDate = rtcDate + str(int(rtcDateRaw[16:18])+tfh) + str(rtcDateRaw[19:21])
 
-        #format bbbDate
-        bbbDate = str(bbbDateRaw[24:28]) + str(bbbDateRaw[4:7]) + str(bbbDateRaw[9:11]) + str(bbbDateRaw[11:13]) + str(bbbDateRaw[14:16])
-        if bbbDate[7] == ' ':
-            bbbDate = bbbDate[0:7] + '0' + bbbDate[8:]
-        
         ## added time check, if RTC on cape does not match bbb system time system will not send data
         ## TODO: should probably check against the network time too
         ## TODO figure out what to do about drift/seconds
-       
-               
+
+        bb_date = get_bb_date()
+        network_date = get_network_date()
+        rtc_date = get_rtc_date()
+
         data_dict['device_key'] = DEVICE_KEY
         data_dict['device_id'] = self.device_id
-        data_dict['timestamp'] = bbbDate
+        data_dict['timestamp'] = bb_date
         data = json.dumps(data_dict)
-			        
-        if (bbbDate==rtcDate) and (bbbDate == netDate):
+
+        if (bb_date == rtc_date) and (bb_date == network_date):
             while True:
                 self.connect()
 
@@ -126,6 +103,45 @@ class ServerConnection(object):
                     return 0
         else:
             self.logger.info("CC RTC time doesn't match BBB time, no data sent to server")
+            return
+
+
+    # grabs timestamps from BB
+    # formats to the same structure '%y%b%d%H:%M:%S'
+    def get_bb_date():
+        # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
+        bb_date = subprocess.check_output(['date'])
+
+        # Format to '2016Feb0921:28:23'
+        bb_date = datetime.strptime(bb_date, '%a %b  %d %H:%M:%S %Z %Y')
+        bb_date = datetime.strftime(bb_date, '%y%b%d%H:%M:%S')
+
+        return bb_date
+
+    # grabs timestamps from network
+    # formats to the same structure '%y%b%d%H:%M:%S'
+    def get_network_date():
+        # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
+        network_date = subprocess.check_output(['ntpdate', '-q', 'time-c.nist.gov'])
+        # network_date doesn't have a year, append to end
+        network_date = network_date + ' 2016'
+
+        # Format to '2016Feb0921:28:23'
+        network_date = datetime.strptime(network_date, '%a %b  %d %H:%M:%S %Z %Y')
+        network_date = datetime.strftime(network_date, '%y%b%d%H:%M:%S')
+
+        return network_date
+
+    # grabs timestamps from CryptoCape RTC
+    # formats to the same structure '%y%b%d%H:%M:%S'
+    def get_rtc_date():
+        # Expected format: 'Tue 09 Feb 2016 09:29:02 PM UTC -1.005808 second'
+        rtc_date = subprocess.check_output(['hwclock', '-r', '-f', '/dev/rtc1'])
+        # Parse out '-1.005808 seconds' cause the module wont know what to do with it
+        rtc_date = rtc_date[0:31]
+        # Format to '2016Feb0921:28:23'
+        rtc_date = datetime.strptime(rtc_date, '%a %d %b %Y %H:%M:%S %p %Z')
+        rtc_date = datetime.strftime(rtc_date, '%y%b%d%H:%M:%S')
 
     def register_device(self):
         d = {'type' : 'register_device'}
@@ -174,7 +190,7 @@ class Logger(object):
         """
         self.listen_socket.bind(('', Logger.LOGGER_PORT))
         self.listen_socket.listen(1)
-        
+
         while True:
             try:
                 conn, _ = self.listen_socket.accept()
@@ -241,7 +257,7 @@ def main():
 
         while (True):
             c = avr.read_key()
-            
+
             # read_key() will always return a character. NULL means no new
             # key presses.
             if c == '\0':
@@ -260,7 +276,7 @@ def main():
                 # Otherwise, the # character always terminates the input.
                 if buf in ('*#', '*#*#', '*#*#*#'):
                     continue
-                
+
                 if buf == '*#*#*#*#':
                     if server.register_device():
                         logger.info('Registration successful')
@@ -297,7 +313,7 @@ def main():
                         logger.error('Invalid entry')
                         buf = ""
                         continue
-                    
+
                     master_password = buf[:8]
                     new_password = buf[9:-1]
 

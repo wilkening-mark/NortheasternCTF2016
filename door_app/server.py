@@ -39,17 +39,17 @@ class Widget(object):
         if not isinstance(data.get('pin', None), int):
             raise TypeError('Invalid type, expected int')
         else:
-            self.device_id = data.get('pin', None)
+            self.pin = data.get('pin', None)
         # Checks flag for type String
         if not isinstance(data.get('flag', None), str):
             raise TypeError('Invalid type, expected int')
         else:
-            self.device_id = data.get('flag', None)
-        # Checks device_id for type int
+            self.flag = data.get('flag', None)
+        # Checks device_key for type int
         if not isinstance(data.get('device_key', None), int):
              raise TypeError('Invalid type, expected int')
         else:
-            self.device_id = data.get('device_key', None)
+            self.device_key = data.get('device_key', None)
 
 
 # TODO: Make this thread-safe and/or figure out what will happen when multiple requests come in simultaneously
@@ -78,56 +78,75 @@ class DoorServer(protocol.Protocol):
         # TODO:  Should verify that the json object has all the fields that we expect :)
 
         flag = None
-        localDateRaw = subprocess.check_output(['date'])
-        netDateRaw = subprocess.check_output(['ntpdate', '-q', 'time-c.nist.gov'])
-        localDate = str(localDateRaw[24:28]) + str(localDateRaw[4:7]) + str(localDateRaw[9:11]) + str(localDateRaw[11:13]) + str(localDateRaw[14:16])
-        netDateRaw = netDateRaw[62:77]
-        netDate = '2016' + str(netDateRaw[3:6]) + str(netDateRaw[0:2]) + str(netDateRaw[7:9]) + str(netDateRaw[10:12])
-        if netDate[7] == ' ':
-            netDate = netDate[0:7] + '0' + netDate[8:]
-        if localDate[7] == ' ':
-            localDate = localDate[0:7] + '0' + netDate[8:]
-                
-        if request["timestamp"] != localDate:
+
+        if (request["timestamp"] == get_bb_date()) and (request["timestamp"] == get_network_date()):
+            if request["type"] == 'register_device':
+                print "Register request (%s)" % repr(request)
+                add_reg_request(request['device_key'], request['device_id'])
+                self.send_response(1)
+                return
+
+            else:
+                # For all requests other than register_device, we need to verify the device id and key
+                if (request['device_id'] not in REGISTERED_DEVICES or
+                    REGISTERED_DEVICES[request['device_id']].device_key != request['device_key']):
+                    print "Denying request with invalid device_id or invalid device_key"
+                    self.send_response(0)
+                    return
+
+
+            if request["type"] == 'open_door':
+                print "Open door request (%s)" % repr(request)
+                success, flag = verify_correct_pin(request['device_id'], request['pin'])
+
+            elif request["type"] == 'master_change_password':
+                print "PIN change request using master PIN (%s)" % repr(request)
+                if request["master_pin"] == MASTER_PIN:
+                    success = update_registered(request['device_id'], request['new_pin'])
+                else:
+                    success = 0
+
+            elif request["type"] == 'tenant_change_password':
+                print "Tenant PIN change request (%s)" % repr(request)
+                success,_ = verify_correct_pin(request['device_id'], request['current_pin'])
+                if success:
+                    success = update_registered(request['device_id'], request['new_pin'])
+            else:
+                print "Unknown request (%s)" % repr(request)
+                success = 0
+
+            self.send_response(success, flag=flag)
+
+        else:
             self.send_response(0)
             return
 
-        if request["type"] == 'register_device':
-            print "Register request (%s)" % repr(request)
-            add_reg_request(request['device_key'], request['device_id'])
-            self.send_response(1)
-            return
 
-        else:
-            # For all requests other than register_device, we need to verify the device id and key
-            if (request['device_id'] not in REGISTERED_DEVICES or
-                REGISTERED_DEVICES[request['device_id']].device_key != request['device_key']):
-                print "Denying request with invalid device_id or invalid device_key"
-                self.send_response(0)
-                return
+    # grabs timestamps from BB
+    # formats to the same structure '%y%b%d%H:%M:%S'
+    def get_bb_date():
+        # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
+        bb_date = subprocess.check_output(['date'])
 
+        # Format to '2016Feb0921:28:23'
+        bb_date = datetime.strptime(bb_date, '%a %b  %d %H:%M:%S %Z %Y')
+        bb_date = datetime.strftime(bb_date, '%y%b%d%H:%M:%S')
 
-        if request["type"] == 'open_door':
-            print "Open door request (%s)" % repr(request)
-            success, flag = verify_correct_pin(request['device_id'], request['pin'])
+        return bb_date
 
-        elif request["type"] == 'master_change_password':
-            print "PIN change request using master PIN (%s)" % repr(request)
-            if request["master_pin"] == MASTER_PIN:
-                success = update_registered(request['device_id'], request['new_pin'])
-            else:
-                success = 0
+    # grabs timestamps from network
+    # formats to the same structure '%y%b%d%H:%M:%S'
+    def get_network_date():
+        # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
+        network_date = subprocess.check_output(['ntpdate', '-q', 'time-c.nist.gov'])
+        # network_date doesn't have a year, append to end
+        network_date = network_date + ' 2016'
 
-        elif request["type"] == 'tenant_change_password':
-            print "Tenant PIN change request (%s)" % repr(request)
-            success,_ = verify_correct_pin(request['device_id'], request['current_pin'])
-            if success:
-                success = update_registered(request['device_id'], request['new_pin'])
-        else:
-            print "Unknown request (%s)" % repr(request)
-            success = 0
+        # Format to '2016Feb0921:28:23'
+        network_date = datetime.strptime(network_date, '%a %b  %d %H:%M:%S %Z %Y')
+        network_date = datetime.strftime(network_date, '%y%b%d%H:%M:%S')
 
-        self.send_response(success, flag=flag)
+        return network_date
 
 
     def send_response(self, success, flag=None):
