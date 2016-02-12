@@ -11,8 +11,8 @@ PORT = 9500
 # computer then you wouldn't need socat.  However, you should make sure that your system is tested with a proxy
 # because it will be necessary for connecting to the live server.
 
-DEFAULT_PIN = '123456'
-DEFAULT_FLAG = '<theflag>'
+DEFAULT_PIN = '654321'
+DEFAULT_FLAG = 'Welcome Home, <tenant>'
 
 ROOTDIR = os.path.dirname(__file__)
 REGISTERED_FILE = os.path.join(ROOTDIR, 'data', 'registered-widgets.txt')
