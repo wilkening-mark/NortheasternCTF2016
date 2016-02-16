@@ -6,9 +6,16 @@ import subprocess
 import time
 import threading
 from uuid import getnode as get_mac
+from Crypto.PublicKey import RSA
+from Crypto import Random
+from datetime import datetime
 
 # This is a (bad) example of the "something you have" portion of the authentication.
 DEVICE_KEY = '12345'
+PUBLIC_KEY_FILE = '~/rsa_key.pub'
+public_key_f = open(PUBLIC_KEY_FILE, 'r')
+public_key = RSA.importKey(public_key_f.read())
+public_key_f.close()
 
 class AVRChip(object):
     """
@@ -73,8 +80,8 @@ class ServerConnection(object):
         ## added timestamp sent to server
         bbbDate = subprocess.check_output(['date'])
         rtcDate = subprocess.check_output(['hwclock', '-r', '-f', '/dev/rtc1'])
-        rtcDate = rtcDate[0:len(bbbDate)]        
-        
+        rtcDate = rtcDate[0:len(bbbDate)]
+
         #format rtcDate
         rtcDateParts=[]
         #year
@@ -103,17 +110,18 @@ class ServerConnection(object):
         bbbDateParts.append(int(bbbDate[11:13]))
         #minute
         bbbDateParts.append(int(bbbDate[14:16]))
-        
+
         ## added time check, if RTC on cape does not match bbb system time system will not send data
         ## TODO: should probably check against the network time too
         ## TODO figure out what to do about drift/seconds
-       
-               
+
+
         data_dict['device_key'] = DEVICE_KEY
         data_dict['device_id'] = self.device_id
         data_dict['timestamp'] = bbbDateParts
-        data = json.dumps(data_dict)
-			        
+        data = public_key.encrypt(json.dumps(data_dict),32)
+        data = [0x00, data.length] + data
+
         if bbbDateParts==rtcDateParts:
             while True:
                 self.connect()
@@ -182,7 +190,7 @@ class Logger(object):
         """
         self.listen_socket.bind(('', Logger.LOGGER_PORT))
         self.listen_socket.listen(1)
-        
+
         while True:
             try:
                 conn, _ = self.listen_socket.accept()
@@ -249,7 +257,7 @@ def main():
 
         while (True):
             c = avr.read_key()
-            
+
             # read_key() will always return a character. NULL means no new
             # key presses.
             if c == '\0':
@@ -268,7 +276,7 @@ def main():
                 # Otherwise, the # character always terminates the input.
                 if buf in ('*#', '*#*#', '*#*#*#'):
                     continue
-                
+
                 if buf == '*#*#*#*#':
                     if server.register_device():
                         logger.info('Registration successful')
@@ -305,7 +313,7 @@ def main():
                         logger.error('Invalid entry')
                         buf = ""
                         continue
-                    
+
                     master_password = buf[:8]
                     new_password = buf[9:-1]
 

@@ -1,4 +1,7 @@
 from twisted.internet import reactor, protocol
+from Crypto.PublicKey import RSA
+from Crypto import Random
+from datetime import datetime
 import json
 import os
 import subprocess
@@ -15,8 +18,13 @@ DEFAULT_PIN = '123456'
 DEFAULT_FLAG = '<theflag>'
 
 ROOTDIR = os.path.dirname(__file__)
-REGISTERED_FILE = os.path.join(ROOTDIR, 'data', 'registered-widgets.txt')
-REQUESTED_FILE = os.path.join(ROOTDIR, 'data', 'requested-widgets.txt')
+REGISTERED_FILE = os.path.join(ROOTDIR, 'registered-widgets.txt')
+REQUESTED_FILE = os.path.join(ROOTDIR, 'requested-widgets.txt')
+
+PRIVATE_KEY_FILE = os.path.join(ROOTDIR, 'rsa_key')
+private_key_f = open(PRIVATE_KEY_FILE, 'r')
+private_key = RSA.importKey(private_key_f.read())
+private_key_f.close()
 
 class Widget(object):
     """
@@ -56,20 +64,38 @@ class Widget(object):
 class DoorServer(protocol.Protocol):
     """
     Handles incoming requests on TCP port.
-    Expect request data to be formatted as a JSON object with:
-        type:     open_door | register_device | master_change_password | tenant_change_password
-        device_id: <any unique identifier for the device>
-        pin:   The pin encoded as ASCII -- only sent with 'open_door' request.
-        current_pin:  Sent with tenant_change_password request.
-        new_pin:      Sent with tenant_change_password request.
-        master_pin:   Sent with master_change_password request.
+    Expect request data to be formatted as:
+        A header formatted as:
+            'Special Byte' '0x00'
+            Length of Message: 1 Byte
+        A JSON object encrypted with device public key and signature:
+            current_pin:  Sent with tenant_change_password request.
+            device_id: <any unique identifier for the device>
+            master_pin:   Sent with master_change_password request.
+            new_pin:      Sent with tenant_change_password request.
+            pin:   The pin encoded as ASCII -- only sent with 'open_door' request.
+            timestamp: Time the message was encoded and sent
+            type:     open_door | register_device | master_change_password | tenant_change_password
+
+    Given that we are not opening new connections for incoming messages we are
+    quite vulnerable to DOS. Not really a high priority though given the
+    application.
     """
+
+    """
+    Buffer incoming message packets until we have a full message. If multiple
+    messages are recieved simultaneously (very unlikely given normal operation)
+    then those messages will not decrypt properly and will be discarded.
+    """
+    data_queue = ''
+    message_length = 0
 
     # this function is called whenever we receive new data
     def dataReceived(self, data):
 
         try:
-            request = json.loads(data)
+            request = json.loads(private_key.decrypt(data[2:message_length+2]))
+            data = data[message_length+3:]
         except ValueError:
             # Bad data
             self.send_response(0)
