@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import json
 import socket
-import smbus
+#import smbus
 import subprocess
 import time
 import threading

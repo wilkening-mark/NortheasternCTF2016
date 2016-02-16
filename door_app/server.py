@@ -21,7 +21,7 @@ ROOTDIR = os.path.dirname(__file__)
 REGISTERED_FILE = os.path.join(ROOTDIR, 'registered-widgets.txt')
 REQUESTED_FILE = os.path.join(ROOTDIR, 'requested-widgets.txt')
 
-PRIVATE_KEY_FILE = os.path.join(ROOTDIR, 'rsa_key')
+PRIVATE_KEY_FILE = '/Users/mwilkening/rsa_key'
 private_key_f = open(PRIVATE_KEY_FILE, 'r')
 private_key = RSA.importKey(private_key_f.read())
 private_key_f.close()
