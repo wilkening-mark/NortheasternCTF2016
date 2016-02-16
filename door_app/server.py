@@ -3,6 +3,7 @@ import json
 import os
 import subprocess
 import Queue
+from datetime import datetime
 
 MASTER_PIN = '12345678'
 REGISTERED_DEVICES = {}
@@ -12,8 +13,8 @@ PORT = 9500
 # computer then you wouldn't need socat.  However, you should make sure that your system is tested with a proxy
 # because it will be necessary for connecting to the live server.
 
-DEFAULT_PIN = '123456'
-DEFAULT_FLAG = '<theflag>'
+DEFAULT_PIN = '654321'
+DEFAULT_FLAG = 'Welcome Home, <tenant>'
 
 ROOTDIR = os.path.dirname(__file__)
 REGISTERED_FILE = os.path.join(ROOTDIR, 'data', 'registered-widgets.txt')
@@ -31,26 +32,30 @@ class Widget(object):
             data = json.loads(json_str)
         except ValueError:
             raise ValueError('ValueError: Invalid JSON Values')
-        # Checks device_id for type int
-        if not isinstance(data.get('device_id', None), int) and not isinstance(data.get('device_id', None), unicode):
-            raise TypeError('Invalid type, expected int')
-        else:
-            self.device_id = data.get('device_id', None)
-        # Checks pin for type int
-        if not isinstance(data.get('pin', None), int) and not isinstance(data.get('pin', None), unicode):
-            raise TypeError('Invalid type, expected int')
-        else:
-            self.pin = data.get('pin', None)
-        # Checks flag for type String
-        if not isinstance(data.get('flag', None), str) and not isinstance(data.get('flag', None), unicode):
-            raise TypeError('Invalid type, expected int')
-        else:
-            self.flag = data.get('flag', None)
+
+        # Cast device_id as type int, if fails, raise error
+        try:
+            self.device_id = int(data.get('device_id', None))
+        except:
+            raise TypeError('Cannot cast as int')
+
+        # Cast pin as type int
+        try:
+            self.pin = int(data.get('pin', None))
+        except:
+            raise TypeError('Cannot cast as int')
+
+        # Cast flag as type String
+        try:
+            self.flag = str(data.get('flag', None))
+        except:
+            raise TypeError('Cannot cast as String')
+
         # Checks device_key for type int
-        if not isinstance(data.get('device_key', None), int) and not isinstance(data.get('device_key', None), unicode):
-             raise TypeError('Invalid type, expected int')
-        else:
-            self.device_key = data.get('device_key', None)
+        try:
+            self.device_key = int(data.get('device_key', None))
+        except:
+            raise TypeError('Cannot cast as int')
 
 # TODO: Make this thread-safe and/or figure out what will happen when multiple requests come in simultaneously
 class DoorServer(protocol.Protocol):
@@ -83,60 +88,78 @@ class DoorServer(protocol.Protocol):
         # TODO:  Should verify that the json object has all the fields that we expect :)
 
         flag = None
-        localDate = subprocess.check_output(['date'])
-        #format localDate
-        localDateParts=[]
-        #year
-        localDateParts.append(int(localDate[24:28]))
-        #month
-        localDateParts.append(localDate[4:7])
-        #day
-        localDateParts.append(int(localDate[9:11]))
-        #hour
-        localDateParts.append(int(localDate[11:13]))
-        #minute
-        localDateParts.append(int(localDate[14:16]))
-        if request["timestamp"] != localDateParts:
+
+        if (request["timestamp"] == self.get_bb_date()) and (request["timestamp"] == self.get_network_date()):
+            if request["type"] == 'register_device':
+                print "Register request (%s)" % repr(request)
+                add_reg_request(request['device_key'], request['device_id'])
+                self.send_response(1)
+                return
+
+            else:
+                # For all requests other than register_device, we need to verify the device id and key
+                if (request['device_id'] not in REGISTERED_DEVICES or
+                    REGISTERED_DEVICES[request['device_id']].device_key != request['device_key']):
+                    print "Denying request with invalid device_id or invalid device_key"
+                    self.send_response(0)
+                    return
+
+
+            if request["type"] == 'open_door':
+                print "Open door request (%s)" % repr(request)
+                success, flag = verify_correct_pin(request['device_id'], request['pin'])
+
+            elif request["type"] == 'master_change_password':
+                print "PIN change request using master PIN (%s)" % repr(request)
+                if request["master_pin"] == MASTER_PIN:
+                    success = update_registered(request['device_id'], request['new_pin'])
+                else:
+                    success = 0
+
+            elif request["type"] == 'tenant_change_password':
+                print "Tenant PIN change request (%s)" % repr(request)
+                success,_ = verify_correct_pin(request['device_id'], request['current_pin'])
+                if success:
+                    success = update_registered(request['device_id'], request['new_pin'])
+            else:
+                print "Unknown request (%s)" % repr(request)
+                success = 0
+
+            self.send_response(success, flag=flag)
+
+        else:
             self.send_response(0)
             return
 
-        if request["type"] == 'register_device':
-            print "Register request (%s)" % repr(request)
-            add_reg_request(request['device_key'], request['device_id'])
-            self.send_response(1)
-            return
 
-        else:
-            # For all requests other than register_device, we need to verify the device id and key
-            if (request['device_id'] not in REGISTERED_DEVICES or
-                REGISTERED_DEVICES[request['device_id']].device_key != request['device_key']):
-                print "Denying request with invalid device_id or invalid device_key"
-                self.send_response(0)
-                return
+    # grabs timestamps from BB
+    # formats to the same structure '%y%b%d%H:%M:%S'
+    def get_bb_date(self):
+        # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
+        bb_date = subprocess.check_output(['date'])
+        #the linux command will return an escape character at the end of the string, we don't want that
+        bb_date = bb_date[0:28]
 
+        # Format to '2016Feb0921:28:23'
+        bb_date = datetime.strptime(bb_date, '%a %b %d %H:%M:%S %Z %Y')
+        bb_date = datetime.strftime(bb_date, '%Y%b%d%H:%M:%S')
 
-        if request["type"] == 'open_door':
-            print "Open door request (%s)" % repr(request)
-            success, flag = verify_correct_pin(request['device_id'], request['pin'])
+        return bb_date
 
-        elif request["type"] == 'master_change_password':
-            print "PIN change request using master PIN (%s)" % repr(request)
-            if request["master_pin"] == MASTER_PIN:
-                success = update_registered(request['device_id'], request['new_pin'])
-            else:
-                success = 0
+    # grabs timestamps from network
+    # formats to the same structure '%y%b%d%H:%M:%S'
+    def get_network_date(self):
+        # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
+        network_date = subprocess.check_output(['ntpdate', '-q', 'time-c.nist.gov'])
+        network_date = network_date[0:15]
+        # network_date doesn't have a year, append to end
+        network_date = network_date + ' 2016'
 
-        elif request["type"] == 'tenant_change_password':
-            print "Tenant PIN change request (%s)" % repr(request)
-            success,_ = verify_correct_pin(request['device_id'], request['current_pin'])
-            if success:
-                success = update_registered(request['device_id'], request['new_pin'])
-        else:
-            print "Unknown request (%s)" % repr(request)
-            success = 0
+        # Format to '2016Feb0921:28:23' 
+        network_date = datetime.strptime(network_date, '%d %b %H:%M:%S %Y')
+        network_date = datetime.strftime(network_date, '%Y%b%d%H:%M:%S')
 
-        self.send_response(success, flag=flag)
-
+        return network_date
 
     def send_response(self, success, flag=None):
         """
@@ -186,6 +209,8 @@ def add_reg_request(device_key, device_id):
 
     with open(REQUESTED_FILE, 'a+') as f:
         print >> f, json.dumps(d)
+
+    return d
 
 
 def verify_correct_pin(device_id, pin):
