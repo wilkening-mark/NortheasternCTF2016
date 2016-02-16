@@ -4,6 +4,7 @@ import os
 import subprocess
 import Queue
 from datetime import datetime
+from time import time
 
 MASTER_PIN = '12345678'
 REGISTERED_DEVICES = {}
@@ -70,10 +71,13 @@ class DoorServer(protocol.Protocol):
         master_pin:   Sent with master_change_password request.
     """
 
+    def __init__(self):
+        self.timeQueue = TimeQueue()
+
     # this function is called whenever we receive new data
     def dataReceived(self, data):
 
-        if rate_limit_full():
+        if self.timeQueue.rate_limit_full():
             print "Rate limit reached."
             self.send_response(0)
             return
@@ -227,42 +231,45 @@ def verify_correct_pin(device_id, pin):
     else:
         return (0, None)
 
-def create_access_table():
-    """
-    Creates a table that lists the last attempts to unlock the door.
-    This table stores the times to limit the possibility of brute force.
-    """
-    REQUEST_LIMIT_PER_HOUR = 60
-    
-    access_table = Queue.Queue(maxsize = REQUEST_LIMIT_PER_HOUR)
+class TimeQueue(object):
+    def __init__(self):
+        """
+        Creates a table that lists the last attempts to unlock the door.
+        This table stores the times to limit the possibility of brute force.
+        """
+        REQUEST_LIMIT_PER_HOUR = 60
 
-def push_access_time():
-    access_table.put(time.time())
+        self.access_table = Queue.Queue(maxsize = REQUEST_LIMIT_PER_HOUR)
 
-def rate_limit_full():
-    """
-    Checks the amount of unlocks that have been done in the last hour,
-    removing them from the queue if they are older. If fewer than the limit
-    (the size of the queue) have been done, goes through with the unlock if valid.
-    """
-    HOURS = 1
-    MINUTES_IN_HOUR = 60
-    SECONDS_IN_MINUTE = 60
+    def push_access_time(self):
+        self.access_table.put(datetime.now())
 
-    if access_table.full():
+    def rate_limit_full(self):
+        """
+        Checks the amount of unlocks that have been done in the last hour,
+        removing them from the queue if they are older. If fewer than the limit
+        (the size of the queue) have been done, goes through with the unlock if valid.
+        """
+        HOURS = 1
+        MINUTES_IN_HOUR = 60
+        SECONDS_IN_MINUTE = 60
 
-        while time.time() - access_table.queue[0] > HOURS * MINUTES_IN_HOUR * SECONDS_IN_MINUTE:
-            access_table.get()
+        if self.access_table.full():
 
-        if access_table.full():
-            return True
+            while (datetime.now() - self.access_table.queue[0]).total_seconds() \
+                    > HOURS * MINUTES_IN_HOUR * SECONDS_IN_MINUTE:
+                self.access_table.get()
+
+            if self.access_table.full():
+                return True
+            else:
+                self.push_access_time()
+                return False
+
         else:
-            push_access_time()
+            self.push_access_time()
             return False
-            
-    else:
-        push_access_time()
-        return False
+
 
 def main():
     """
@@ -270,8 +277,6 @@ def main():
     Opens up ServerFactory to listen for requests on the specified port.
     """
     open(REGISTERED_FILE, 'a').close() # touch the file so that it exists
-
-    create_access_table()
 
     with open(REGISTERED_FILE, 'r') as f:
         for line in f:
