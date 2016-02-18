@@ -4,7 +4,7 @@ import os
 import subprocess
 import Queue
 from datetime import datetime
-from time import time
+from collections import deque
 
 MASTER_PIN = '12345678'
 REGISTERED_DEVICES = {}
@@ -237,12 +237,17 @@ class TimeQueue(object):
         Creates a table that lists the last attempts to unlock the door.
         This table stores the times to limit the possibility of brute force.
         """
-        REQUEST_LIMIT_PER_HOUR = 60
+        self.REQUEST_LIMIT_PER_TIME = 5
+        self.HOURS = 1.0/60 / 4
+        self.MINUTES_IN_HOUR = 60
+        self.SECONDS_IN_MINUTE = 60
 
-        self.access_table = Queue.Queue(maxsize = REQUEST_LIMIT_PER_HOUR)
+        self.access_table = deque()
 
     def push_access_time(self):
-        self.access_table.put(datetime.now())
+        now = datetime.now()
+        #print now
+        self.access_table.append(now)
 
     def rate_limit_full(self):
         """
@@ -250,17 +255,27 @@ class TimeQueue(object):
         removing them from the queue if they are older. If fewer than the limit
         (the size of the queue) have been done, goes through with the unlock if valid.
         """
-        HOURS = 1
-        MINUTES_IN_HOUR = 60
-        SECONDS_IN_MINUTE = 60
 
-        if self.access_table.full():
 
-            while (datetime.now() - self.access_table.queue[0]).total_seconds() \
-                    > HOURS * MINUTES_IN_HOUR * SECONDS_IN_MINUTE:
-                self.access_table.get()
+        if len(self.access_table) >= self.REQUEST_LIMIT_PER_TIME:
+            now = datetime.now()
+            then = self.access_table[0]
 
-            if self.access_table.full():
+            while len(self.access_table) > 0 and \
+                abs(now - then).total_seconds() > \
+                self.HOURS * self.MINUTES_IN_HOUR * self.SECONDS_IN_MINUTE:
+
+                #current = self.access_table[0]
+                #print "Current:" + str(current)
+
+                if len(self.access_table) > 0:
+                    then = self.access_table.popleft()
+
+                #print len(self.access_table)
+
+                #sprint abs(now - then).total_seconds()
+
+            if len(self.access_table) >= self.REQUEST_LIMIT_PER_TIME:
                 return True
             else:
                 self.push_access_time()
