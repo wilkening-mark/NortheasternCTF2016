@@ -237,8 +237,8 @@ class TimeQueue(object):
         Creates a table that lists the last attempts to unlock the door.
         This table stores the times to limit the possibility of brute force.
         """
-        self.REQUEST_LIMIT_PER_TIME = 5
-        self.HOURS = 1.0/60 / 4
+        self.REQUEST_LIMIT_PER_TIME = 60
+        self.HOURS = 1.0
         self.MINUTES_IN_HOUR = 60
         self.SECONDS_IN_MINUTE = 60
 
