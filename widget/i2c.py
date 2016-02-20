@@ -1,26 +1,29 @@
-
-#  1 Write 0x55AA to device
-#  2 Check for I/O error (no device connected)
-#  3 Read the device
-#  4 Display result
+#  Write 0x55AA to device
 
 # import libraries
 import smbus as smbus
 import fcntl
+import time
 
 # define I2C address
 i2c_addr = 0x48
 
 #configure I2C bus for functions
-i2c = smbus.SMBus(1)
+i2c = smbus.SMBus(1) # /dev/i2c-1
 
-# value to send
+# values to send
 temp = 0x55AA
+low = 0x00
 
 # Set outputs
 try :
-   print 'send write command'
-   i2c.write_byte_data( i2c_addr, temp & 0xff, ( temp & 0xff ) >> 8 )
+   print 'wake up chip!!'
+   # send low
+   i2c.write_byte(i2c_addr, low)
+   time.sleep(1) # wait
+   print 'attempt to write'
+   i2c.write_byte_data( i2c_addr, temp & 0xff, ( temp & 0xff ) >> 8 ) # write data
+
 except IOError :
    print 'device not found at I2C address'
    error = 1
