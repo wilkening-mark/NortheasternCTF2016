@@ -2,7 +2,9 @@ from twisted.internet import reactor, protocol
 import json
 import os
 import subprocess
+import Queue
 from datetime import datetime
+from collections import deque
 
 MASTER_PIN = '12345678'
 REGISTERED_DEVICES = {}
@@ -56,7 +58,6 @@ class Widget(object):
         except:
             raise TypeError('Cannot cast as int')
 
-
 # TODO: Make this thread-safe and/or figure out what will happen when multiple requests come in simultaneously
 class DoorServer(protocol.Protocol):
     """
@@ -70,8 +71,16 @@ class DoorServer(protocol.Protocol):
         master_pin:   Sent with master_change_password request.
     """
 
+    def __init__(self):
+        self.timeQueue = TimeQueue()
+
     # this function is called whenever we receive new data
     def dataReceived(self, data):
+
+        if self.timeQueue.rate_limit_full():
+            print "Rate limit reached."
+            self.send_response(0)
+            return
 
         try:
             request = json.loads(data)
@@ -222,6 +231,59 @@ def verify_correct_pin(device_id, pin):
     else:
         return (0, None)
 
+class TimeQueue(object):
+    def __init__(self):
+        """
+        Creates a table that lists the last attempts to unlock the door.
+        This table stores the times to limit the possibility of brute force.
+        """
+        self.REQUEST_LIMIT_PER_TIME = 60
+        self.HOURS = 1.0
+        self.MINUTES_IN_HOUR = 60
+        self.SECONDS_IN_MINUTE = 60
+
+        self.access_table = deque()
+
+    def push_access_time(self):
+        now = datetime.now()
+        #print now
+        self.access_table.append(now)
+
+    def rate_limit_full(self):
+        """
+        Checks the amount of unlocks that have been done in the last hour,
+        removing them from the queue if they are older. If fewer than the limit
+        (the size of the queue) have been done, goes through with the unlock if valid.
+        """
+
+
+        if len(self.access_table) >= self.REQUEST_LIMIT_PER_TIME:
+            now = datetime.now()
+            then = self.access_table[0]
+
+            while len(self.access_table) > 0 and \
+                abs(now - then).total_seconds() > \
+                self.HOURS * self.MINUTES_IN_HOUR * self.SECONDS_IN_MINUTE:
+
+                #current = self.access_table[0]
+                #print "Current:" + str(current)
+
+                if len(self.access_table) > 0:
+                    then = self.access_table.popleft()
+
+                #print len(self.access_table)
+
+                #sprint abs(now - then).total_seconds()
+
+            if len(self.access_table) >= self.REQUEST_LIMIT_PER_TIME:
+                return True
+            else:
+                self.push_access_time()
+                return False
+
+        else:
+            self.push_access_time()
+            return False
 
 
 def main():
