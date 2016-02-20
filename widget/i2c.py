@@ -22,12 +22,14 @@ try :
    i2c.write_byte(i2c_addr, low)
    time.sleep(1) # wait
    print 'attempt to write'
-   i2c.write_byte_data( i2c_addr, temp & 0xff, ( temp & 0xff ) >> 8 ) # write data
+   i2c.write_byte_data(i2c_addr, temp & 0xff, ( temp & 0xff ) >> 8) # write data
+   i2c.write_i2c_block_data(i2c_addr, temp & 0xff, ( temp & 0xff ) >> 8)
 
 except IOError :
    print 'device not found at I2C address'
    error = 1
 else :
    # Now read
-   temp = i2c.read_word_data( i2c_addr, 0 )
+   temp = i2c.read_word_data(i2c_addr, 0)
+   i2c.read_i2c_block_data(i2c_addr, 0)
    print 'we r reading'
