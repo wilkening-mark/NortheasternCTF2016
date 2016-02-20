@@ -5,6 +5,7 @@ import smbus
 import subprocess
 import time
 import threading
+import random
 from uuid import getnode as get_mac
 from datetime import datetime
 
@@ -52,7 +53,7 @@ class ServerConnection(object):
     def __init__(self, logger):
         self.logger = logger
         self.conn = None
-        self.device_id = str(get_mac())
+        self.device_id = ''.join(["%s" % random.randint(0, 9) for num in range(0, 15)])
 
     def connect(self):
         while self.conn is None:
