@@ -1,0 +1,7 @@
+[run]
+source = twisted
+branch = True
+
+[report]
+precision = 2
+ignore_errors = True

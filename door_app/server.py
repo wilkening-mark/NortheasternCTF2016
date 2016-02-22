@@ -5,7 +5,11 @@ from datetime import datetime
 import json
 import os
 import subprocess
+import Queue
 from datetime import datetime
+from collections import deque
+import struct
+import sys
 
 MASTER_PIN = '12345678'
 REGISTERED_DEVICES = {}
@@ -19,13 +23,47 @@ DEFAULT_PIN = '654321'
 DEFAULT_FLAG = 'Welcome Home, <tenant>'
 
 ROOTDIR = os.path.dirname(__file__)
-REGISTERED_FILE = os.path.join(ROOTDIR, 'registered-widgets.txt')
-REQUESTED_FILE = os.path.join(ROOTDIR, 'requested-widgets.txt')
+REGISTERED_FILE = os.path.join(ROOTDIR, 'data', 'registered-widgets.txt')
+REQUESTED_FILE = os.path.join(ROOTDIR, 'data', 'requested-widgets.txt')
 
 PRIVATE_KEY_FILE = '/Users/mwilkening/rsa_key'
 private_key_f = open(PRIVATE_KEY_FILE, 'r')
 private_key = RSA.importKey(private_key_f.read())
 private_key_f.close()
+
+# Needed to solve unicode problems on Mac
+def json_loads_byteified(json_text):
+    return _byteify(
+        json.loads(json_text, object_hook=_byteify),
+        ignore_dicts=True
+    )
+
+def _byteify(data, ignore_dicts = False):
+    # if this is a unicode string, return its string
+    # representation
+    if isinstance(data, unicode):
+        try:
+            return int(data.encode('utf-8'))
+        except ValueError:
+            return data.encode('utf-8')
+    # if this is a list of values, return
+    # list of byteified values
+    if isinstance(data, list):
+        return [ _byteify(item, ignore_dicts=True) for item in data ]
+    # if this is a
+    # dictionary, return
+    # dictionary of byteified
+    # keys and values
+    # but only if we
+    # haven't already byteified
+    # it
+    if isinstance(data, dict) and not ignore_dicts:
+        return {
+            _byteify(key, ignore_dicts=True): _byteify(value, ignore_dicts=True)
+            for key, value in data.iteritems()
+        }
+    # if it's anything else, return it in its original form
+    return data
 
 class Widget(object):
     """
@@ -36,7 +74,7 @@ class Widget(object):
         # Populate object attributes from JSON object
         # checks if valid JSON
         try:
-            data = json.loads(json_str)
+            data = json_loads_byteified(json_str)
         except ValueError:
             raise ValueError('ValueError: Invalid JSON Values')
 
@@ -63,7 +101,6 @@ class Widget(object):
             self.device_key = int(data.get('device_key', None))
         except:
             raise TypeError('Cannot cast as int')
-
 
 # TODO: Make this thread-safe and/or figure out what will happen when multiple requests come in simultaneously
 class DoorServer(protocol.Protocol):
@@ -92,15 +129,35 @@ class DoorServer(protocol.Protocol):
     messages are recieved simultaneously (very unlikely given normal operation)
     then those messages will not decrypt properly and will be discarded.
     """
-    data_queue = ''
+    data_queue = bytearray('')
     message_length = 0
+
+    def __init__(self):
+        self.timeQueue = TimeQueue()
 
     # this function is called whenever we receive new data
     def dataReceived(self, data):
 
+        if self.timeQueue.rate_limit_full():
+            print "Rate limit reached."
+            self.send_response(0)
+            return
+
+        self.data_queue += bytearray(data)
+        if struct.unpack("I", bytes(self.data_queue[0:4]))[0] == 0:
+            self.message_length = struct.unpack("I", bytes(self.data_queue[4:8]))[0]
+        else:
+            # Bad data
+            self.send_response(0)
+            return
+
+        if sys.getsizeof(self.data_queue) < self.message_length + 8:
+            return
+
         try:
-            request = json.loads(private_key.decrypt(data[2:message_length+2]))
-            data = data[message_length+3:]
+            request = json_loads_byteified(private_key.decrypt(
+                bytes(data[8:self.message_length+8])))
+            data = data[self.message_length+8:]
         except ValueError:
             # Bad data
             self.send_response(0)
@@ -110,7 +167,7 @@ class DoorServer(protocol.Protocol):
 
         flag = None
 
-        if (request["timestamp"] == self.get_bb_date()) and (request["timestamp"] == self.get_network_date()):
+        if True: #(request["timestamp"] == self.get_bb_date()) and (request["timestamp"] == self.get_network_date()):
             if request["type"] == 'register_device':
                 print "Register request (%s)" % repr(request)
                 add_reg_request(request['device_key'], request['device_id'])
@@ -176,7 +233,7 @@ class DoorServer(protocol.Protocol):
         # network_date doesn't have a year, append to end
         network_date = network_date + ' 2016'
 
-        # Format to '2016Feb0921:28:23' 
+        # Format to '2016Feb0921:28:23'
         network_date = datetime.strptime(network_date, '%d %b %H:%M:%S %Y')
         network_date = datetime.strftime(network_date, '%Y%b%d%H:%M:%S')
 
@@ -248,6 +305,59 @@ def verify_correct_pin(device_id, pin):
     else:
         return (0, None)
 
+class TimeQueue(object):
+    def __init__(self):
+        """
+        Creates a table that lists the last attempts to unlock the door.
+        This table stores the times to limit the possibility of brute force.
+        """
+        self.REQUEST_LIMIT_PER_TIME = 60
+        self.HOURS = 1.0
+        self.MINUTES_IN_HOUR = 60
+        self.SECONDS_IN_MINUTE = 60
+
+        self.access_table = deque()
+
+    def push_access_time(self):
+        now = datetime.now()
+        #print now
+        self.access_table.append(now)
+
+    def rate_limit_full(self):
+        """
+        Checks the amount of unlocks that have been done in the last hour,
+        removing them from the queue if they are older. If fewer than the limit
+        (the size of the queue) have been done, goes through with the unlock if valid.
+        """
+
+
+        if len(self.access_table) >= self.REQUEST_LIMIT_PER_TIME:
+            now = datetime.now()
+            then = self.access_table[0]
+
+            while len(self.access_table) > 0 and \
+                abs(now - then).total_seconds() > \
+                self.HOURS * self.MINUTES_IN_HOUR * self.SECONDS_IN_MINUTE:
+
+                #current = self.access_table[0]
+                #print "Current:" + str(current)
+
+                if len(self.access_table) > 0:
+                    then = self.access_table.popleft()
+
+                #print len(self.access_table)
+
+                #sprint abs(now - then).total_seconds()
+
+            if len(self.access_table) >= self.REQUEST_LIMIT_PER_TIME:
+                return True
+            else:
+                self.push_access_time()
+                return False
+
+        else:
+            self.push_access_time()
+            return False
 
 
 def main():
