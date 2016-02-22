@@ -1,0 +1,3 @@
+{"device_key": "12345", "flag": "Welcome Home, <tenant>", "pin": "654321", "device_id": "245187460711371"}
+{"device_key": "12345", "flag": "Welcome Home, <tenant>", "pin": "654321", "device_id": "245187460711371"}
+{"device_key": 12345, "flag": "Welcome Home, <tenant>", "pin": "654321", "device_id": 16829989380123}

@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import sys
+import struct
 import json
 import socket
 import smbus
@@ -7,10 +9,16 @@ import time
 import threading
 import random
 from uuid import getnode as get_mac
+from Crypto.PublicKey import RSA
+from Crypto import Random
 from datetime import datetime
 
 # This is a (bad) example of the "something you have" portion of the authentication.
 DEVICE_KEY = '12345'
+PUBLIC_KEY_FILE = '/home/debian/rsa_key.pub'
+public_key_f = open(PUBLIC_KEY_FILE, 'r')
+public_key = RSA.importKey(public_key_f.read())
+public_key_f.close()
 
 class AVRChip(object):
     """
@@ -76,16 +84,17 @@ class ServerConnection(object):
         ## TODO: should probably check against the network time too
         ## TODO figure out what to do about drift/seconds
 
-        bb_date = self.get_bb_date()
-        network_date = self.get_network_date()
-        rtc_date = self.get_rtc_date()
+#       bb_date = self.get_bb_date()
+#       network_date = self.get_network_date()
+#       rtc_date = self.get_rtc_date()
 
         data_dict['device_key'] = DEVICE_KEY
         data_dict['device_id'] = self.device_id
-        data_dict['timestamp'] = bb_date
-        data = json.dumps(data_dict)
+#       data_dict['timestamp'] = bb_date
+        (data,) = public_key.encrypt(json.dumps(data_dict),32)
+        data = bytearray(struct.pack("I", 0)) + bytearray(struct.pack("I", sys.getsizeof(data))) + bytearray(data)
 
-        if (bb_date == rtc_date) and (bb_date == network_date):
+        if True: #(bb_date == rtc_date) and (bb_date == network_date):
             while True:
                 self.connect()
 
@@ -126,7 +135,7 @@ class ServerConnection(object):
     # formats to the same structure '%y%b%d%H:%M:%S'
     def get_network_date(self):
         # Expected format: 'Tue Feb  9 21:28:23 UTC 2016'
-        network_date = subprocess.check_output(['ntpdate', '-q', 'time-c.nist.gov'])
+        #network_date = subprocess.check_output(['ntpdate', '-q', 'time-c.nist.gov'])
         network_date = network_date[0:15]
         # network_date doesn't have a year, append to end
         network_date = network_date + ' 2016'
