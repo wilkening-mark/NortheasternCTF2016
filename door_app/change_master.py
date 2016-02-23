@@ -1,6 +1,6 @@
 import os, sys, getpass, hashlib
 
-master_path = ".yolo"
+master_path = "data/.yolo"
 default_password = "18981898"
 
 # If yolo file exists, read master pin's hash from it
