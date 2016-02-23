@@ -1,7 +1,7 @@
 #MITRE eCTF Challenge 2016
-#Handoff Document 2-24-16
+#Hand-off Document 2-24-16
 ##Northeastern Team
-###Members: Benjamin Tan, Emily Pankosky, Erin O'Neill, Kim Tran, Mark Wilkening, Nicholas Kubasti, Samantha Gray,     Victoria Suha  
+###Members: Benjamin Tan, Emily Pankosky, Erin O'Neill, Kim Tran, Mark Wilkening, Nicholas Kubasti, Samantha Gray, Victoria Suha  
 
 ---
 
@@ -20,7 +20,7 @@ The process for setting a new Master PIN requires access to the server.  This is
 To set a new Master PIN:  
 - Run `python change_master.py SETMASTER` from the server.  
 - Follow the prompts to enter the current and new PINs.  
-- You will recieve `Master PIN changed.  Please restart the server.` if the action was successful.  
+- You will receive `Master PIN changed.  Please restart the server.` if the action was successful.  
 
 ---
 
