@@ -2,13 +2,7 @@
 #Hand-off Document 2-24-16
 ##Northeastern Team
 ###Members: Benjamin Tan, Emily Pankosky, Erin O'Neill, Kim Tran, Mark Wilkening, Nicholas Kubasti, Samantha Gray, Victoria Suha  
-
----
-
-##Irreversible Configurations Made  
-The following changes were made in our BBB image :   
-- We lock the ECC Chip  
-
+ 
 ---
 
 ##Master PIN  
