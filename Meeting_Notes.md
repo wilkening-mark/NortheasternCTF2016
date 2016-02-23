@@ -1,11 +1,12 @@
-##MITRE Notes
+##MITRE Notes  
 
 # Jan 29
 	- Everyone 
 	- Went through attacks
 	- Talked about patch options 
-	- Assigned chips on the board - Research ways to use them (by Monday)
-		- Write some Psuedo-code
+	- Assigned chips on the board 
+	- Research ways to use them (by Monday)
+	- Write some Psuedo-code
 	- Continue with things from the previous Week
 	- Reach out to eCTF team and ask about extra week (Erin)
 	- Come up with a more complete timeline (checking with Profs etc.)
@@ -26,7 +27,8 @@
 	- Look at list, prioritize, assign tasks (Sam, Erin, Emily) Mon/Tues
 
 # Feb 5  
-	- Mark - RSA & Encription - working on merging w/Nick's stuff - Prevent multiple packets @ once 
+	- Mark - RSA & Encription - working on merging w/Nick's stuff 
+	- Prevent multiple packets @ once 
 	- Kim - JSON, Protect packets - valid data
 	- Went through Attacks/Patch doc, status
 	- Ran BBB (Mark, Ben, Kim)  tested some of the code
@@ -37,12 +39,14 @@
 
 #Feb 9th
 	-Nick and Victoria: pulling timestamps from BBB, network and formatting the dates 
-	-if the timestamps match, then continue forward with connection 		-after working on this, we see the need for creating unit testing for our code because it's easy for things to break and hard to pinpoint the source
-	-once the timestamp code is working, Nick and Victoria will move forward with encrypting via the ECC 
+	-if the timestamps match, then continue forward with connection 		
+	-after working on this, we see the need for creating unit testing for our code because it's easy for         
+	things to break and hard to pinpoint the source
+	-once the timestamp code is working, Nick and Victoria will move forward with encrypting via the ECC   
 
 #Feb 11
 	- Victoria and Kim cleaned up timestamps stuff
-	- Created unit tests for implementing 
+	- Created unit tests for implementing   
 
 #Feb 12 
 	- Erin, Victoria, Nick, Mark, Ben, Kim
@@ -56,4 +60,35 @@
 	- Testing deadline Feb19/20
 	- Spend last half week (until 24th handoff) verifying and making sure we meet reqs
 	- Week of handoff (2.24) Friday meeting will be focused on coming up with schedule/plan of attack
-	- On that week - set a plan of action for the  on-campus visit and timing of that
+	- On that week - set a plan of action for the  on-campus visit and timing of that  
+
+#Feb 19
+	- Meeting over weekend to do some testing over the weekend in WC
+	- Talked about *how* to hand it down 
+	- Meeting on Monday 6pm
+	- Should be able to do different testing in parallel
+	- Handoff list is in the reqs - images, source codes, master PIN, docs
+	- This week is about testing the system before handoff Wednesday
+	- Monday - go through tests/req Document.  
+	- Monday - clean up Branches!!!!  
+
+#Feb 22 AM
+	- Everyone 
+	- Meeting with Potter, gave updates of last two weeks
+	- Should be on track to complete everything before hand-off Wed
+	- Sam should reach out about how to hand-off (HW/SW)
+	- Meeting at 6pm for extensive testing further discussion
+	- Suggested that if this was to be run again, that there should be an assigned "class time"
+	- This is crunch time - going to have to work together as a team to get this to go smoothly
+
+#Feb 22 PM
+	- Everyone but Mark
+	- Meeting in Wireless Club to do testing and go through requirements
+	- Verified that tenant PIN can be changed, LED indicates door opened correctly
+	- Figured out Master PIN had to be change-able and shouldn't be hard coded 
+	- Ben worked on that functionality
+	- Some of the team tried to test other things but struggled with the Keys because of their location being hardcoded
+	in Mark's code
+	- Assigned tasks for the rest of the week.  Decided to meet Tuesday afternoon. 
+	- Branch clean moved to Tuesday 
+	
