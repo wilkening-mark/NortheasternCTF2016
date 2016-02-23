@@ -166,7 +166,20 @@ class DoorServer(protocol.Protocol):
         # TODO:  Should verify that the json object has all the fields that we expect :)
 
         flag = None
-
+        
+        ##nick adding signature check
+        signature = request['signature']
+        pubKey = request['pubKey']
+        del request['signature']
+        del request['pubKey']
+        with open('datas','w+') as f:
+            json.dump(request,f)
+        isFail=subprocess.check_output(['eclet','offline-verify-sign','-f','datas','--signature',signature,'--public-key',pubKey])
+        if isFail is not None:
+            self.send_response(0)
+            print 'signature failed'
+            return  
+        
         if True: #(request["timestamp"] == self.get_bb_date()) and (request["timestamp"] == self.get_network_date()):
             if request["type"] == 'register_device':
                 print "Register request (%s)" % repr(request)

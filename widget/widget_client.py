@@ -91,6 +91,15 @@ class ServerConnection(object):
         data_dict['device_key'] = DEVICE_KEY
         data_dict['device_id'] = self.device_id
 #       data_dict['timestamp'] = bb_date
+
+        ##nick adding elliptical curve signature
+        with open('datas','w+') as f:
+            json.dump(data_dict,f)
+        signature=subprocess.check_output('eclet','sign','-f','./datas')
+        pubKey=subprocess.check_output('eclet','get-pub')
+        data_dict['signature']=str(signature)
+        data_dict['pubKey']=str(pubKey)
+
         (data,) = public_key.encrypt(json.dumps(data_dict),32)
         data = bytearray(struct.pack("I", 0)) + bytearray(struct.pack("I", sys.getsizeof(data))) + bytearray(data)
 
