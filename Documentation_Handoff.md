@@ -28,5 +28,5 @@ Our Image can be written to an SD card, and when the BBB is booted from SD, the 
 We have attached the link to the image but it can also be found [here](link for the image file on Drive ?)   
 
 ---
-Please contact us at [suha.v@husky.neu.edu](email:address) if any problems occur.  
+Please contact us at [suha.v@husky.neu.edu](email:suha.v@husky.neu.edu) if any problems occur.  
 Thank you!  
