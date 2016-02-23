@@ -10,8 +10,12 @@ from datetime import datetime
 from collections import deque
 import struct
 import sys
+import hashlib 
 
-MASTER_PIN = '12345678'
+
+with open(".yolo") as f:
+    MASTER_PIN = f.readline().strip() #strip the trailing newline
+     
 REGISTERED_DEVICES = {}
 PORT = 9500
 # Note:  The port number for the server doesn't really matter since the "proxy" (socat) will be used to redirect the
@@ -189,7 +193,8 @@ class DoorServer(protocol.Protocol):
 
             elif request["type"] == 'master_change_password':
                 print "PIN change request using master PIN (%s)" % repr(request)
-                if request["master_pin"] == MASTER_PIN:
+                
+                if hashlib.sha224(request["master_pin"]).hexdigest() == MASTER_PIN:
                     success = update_registered(request['device_id'], request['new_pin'])
                 else:
                     success = 0
