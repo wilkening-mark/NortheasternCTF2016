@@ -8,7 +8,6 @@
 ##Irreversible Configurations Made  
 The following changes were made in our BBB image :   
 - We lock the ECC Chip  
-- Mark - ?  
 
 ---
 
@@ -18,7 +17,7 @@ This pin is required to set a new Master PIN
 The process for setting a new Master PIN requires access to the server.  This is so no tenant can reset the Master PIN with just the widget.  
 
 To set a new Master PIN:  
-- Run `python change_master.py SETMASTER` from the server.  
+- Run `python change_master.py` from the same directory as the server.  
 - Follow the prompts to enter the current and new PINs.  
 - You will receive `Master PIN changed.  Please restart the server.` if the action was successful.  
 
@@ -29,5 +28,5 @@ Our Image can be written to an SD card, and when the BBB is booted from SD, the 
 We have attached the link to the image but it can also be found [here](link for the image file on Drive ?)   
 
 ---
-Please contact us at [someone's email](email:address) if any problems occur.  
+Please contact us at [suha.v@husky.neu.edu](email:address) if any problems occur.  
 Thank you!  
