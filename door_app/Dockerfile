@@ -30,14 +30,15 @@ RUN apt-get update && apt-get install -y python-dev \
 
 VOLUME /src/pythonlistener/data
 
-COPY server.py /src/pythonlistener/
-COPY rsa_key /src/pythonlistener
-COPY change_master.py /src/pythonlistener
-COPY .yolo /src/pythonlistener/data
-COPY registered-widgets.txt /src/pythonlistener/data
-COPY requested-widgets.txt /src/pythonlistener/data
+COPY server.py /src/pythonlistener/server.py
+COPY data/rsa_key /src/pythonlistener/data/rsa_key
+COPY change_master.py /src/pythonlistener/change_master.py
+COPY data/.yolo /src/pythonlistener/data/.yolo
+COPY data/registered-widgets.txt /src/pythonlistener/data/registered-widgets.txt
+COPY data/requested-widgets.txt /src/pythonlistener/data/requested-widgets.txt
 
 
 EXPOSE 9500
 
+#CMD ["python"]
 CMD ["python", "/src/pythonlistener/server.py"]

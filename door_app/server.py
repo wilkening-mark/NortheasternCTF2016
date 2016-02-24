@@ -12,9 +12,10 @@ import struct
 import sys
 import hashlib
 
+import imp
 
-with open(".yolo") as f:
-    MASTER_PIN = f.readline().strip() #strip the trailing newline
+pdb = imp.load_source('pdb', '/usr/lib/python2.7/pdb.py')
+pdb.set_trace()
 
 REGISTERED_DEVICES = {}
 PORT = 9500
@@ -29,6 +30,11 @@ DEFAULT_FLAG = 'Welcome Home, <tenant>'
 ROOTDIR = os.path.dirname(__file__)
 REGISTERED_FILE = os.path.join(ROOTDIR, 'data', 'registered-widgets.txt')
 REQUESTED_FILE = os.path.join(ROOTDIR, 'data', 'requested-widgets.txt')
+
+YOLO_PATH = os.path.join(ROOTDIR, 'data', '.yolo')
+with open(YOLO_PATH) as f:
+    MASTER_PIN = f.readline().strip() #strip the trailing newline
+
 
 PRIVATE_KEY_FILE = os.path.join(ROOTDIR, 'data', 'rsa_key')
 private_key_f = open(PRIVATE_KEY_FILE, 'r')
