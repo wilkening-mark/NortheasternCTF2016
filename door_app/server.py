@@ -372,6 +372,7 @@ class TimeQueue(object):
 
 
 def main():
+    subprocess.call(['./SYN_Flood_Prevention.sh'], shell=True)
     """
     Loads the registered-widgets file.
     Opens up ServerFactory to listen for requests on the specified port.

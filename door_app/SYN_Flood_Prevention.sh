@@ -1,12 +1,12 @@
 # SYN Flood Prevention using iptables against Scapy SYN packets generated
-> /var/log/DDOS_IP.log
+> /tmp/DDOS_IP.log
 > /tmp/test1.txt
 > /tmp/test2.txt
 trap "echo ;echo Caught EXIT signal;iptables -F;echo Iptables entries cleared;echo HaX0R SVP" EXIT
 while true;
 do
-date >> /var/log/DDOS_IP.log
-netstat | grep -E "ssh|www" | grep -iv ESTABLISHED | awk '{print $5}' | cut -d : -f 1 | sort | uniq -c >> /var/log/DDOS_IP.log
+date >> /tmp/DDOS_IP.log
+netstat | grep -E "ssh|www" | grep -iv ESTABLISHED | awk '{print $5}' | cut -d : -f 1 | sort | uniq -c >> /tmp/DDOS_IP.log
 for pip in `netstat | grep -E "ssh|www" | grep -iv ESTABLISHED | awk '{print $5}' | cut -d : -f 1 | sort | uniq`
 do
 conntrack=`netstat | grep -E "ssh|www" | grep -iv ESTABLISHED | awk '{print $5}' | cut -d : -f 1 | grep $pip | wc -l`;
