@@ -18,8 +18,7 @@ To set a new Master PIN:
 ---
 
 ##Image Install
-Our Image can be written to an SD card, and when the BBB is booted from SD, the image will be installed on the BBB.  
-We have attached the link to the image but it can also be found [here](link for the image file on Drive ?)   
+Our Image can be written to an SD card, and when the BBB is booted from SD, the image will be installed on the BBB.     
 
 ---
 Please contact us at [suha.v@husky.neu.edu](email:suha.v@husky.neu.edu) if any problems occur.  
