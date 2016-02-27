@@ -13,7 +13,6 @@ i2c_addr = 0x42
 #configure I2C bus for functions
 i2c = smbus.SMBus(1) # /dev/i2c-1
 
-
 # values to send
 low = 0x00
 
