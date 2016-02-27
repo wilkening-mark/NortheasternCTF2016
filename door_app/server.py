@@ -15,7 +15,7 @@ import hashlib
 import imp
 
 pdb = imp.load_source('pdb', '/usr/lib/python2.7/pdb.py')
-pdb.set_trace()
+# pdb.set_trace()
 
 REGISTERED_DEVICES = {}
 PORT = 9500
@@ -372,7 +372,7 @@ class TimeQueue(object):
 
 
 def main():
-    subprocess.call(['./SYN_Flood_Prevention.sh'], shell=True)
+    # subprocess.call(['./SYN_Flood_Prevention.sh'], shell=True)
     """
     Loads the registered-widgets file.
     Opens up ServerFactory to listen for requests on the specified port.
