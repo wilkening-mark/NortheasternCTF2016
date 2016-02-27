@@ -200,7 +200,7 @@ class DoorServer(protocol.Protocol):
             elif request["type"] == 'master_change_password':
                 print "PIN change request using master PIN (%s)" % repr(request)
 
-                if hashlib.sha224(request["master_pin"]).hexdigest() == MASTER_PIN:
+                if hashlib.sha224(str(request["master_pin"])).hexdigest() == MASTER_PIN:
                     success = update_registered(request['device_id'], request['new_pin'])
                 else:
                     success = 0
