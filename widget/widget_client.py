@@ -14,7 +14,7 @@ from Crypto import Random
 from datetime import datetime
 
 # This is a (bad) example of the "something you have" portion of the authentication.
-DEVICE_KEY = '12345'
+DEVICE_KEY = str(subprocess.check_output(['eclet', 'serial-num'])).strip()
 PUBLIC_KEY_FILE = '/home/debian/rsa_key.pub'
 public_key_f = open(PUBLIC_KEY_FILE, 'r')
 public_key = RSA.importKey(public_key_f.read())
@@ -61,7 +61,8 @@ class ServerConnection(object):
     def __init__(self, logger):
         self.logger = logger
         self.conn = None
-        self.device_id = ''.join(["%s" % random.randint(0, 9) for num in range(0, 15)])
+        with open (".data", "r") as myfile:
+            self.device_id = str(myfile.readline()).strip()
 
     def connect(self):
         while self.conn is None:
@@ -158,6 +159,9 @@ class ServerConnection(object):
         rtc_date = datetime.strftime(rtc_date, '%Y%b%d%H:%M:%S')
 
     def register_device(self):
+        self.device_id = str(''.join(["%s" % random.randint(0, 9) for num in range(0, 15)]))
+        with open (".data", "w") as myfile:
+            myfile.write(self.device_id)
         d = {'type' : 'register_device'}
 
         return self.send(d)

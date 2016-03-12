@@ -106,11 +106,11 @@ class Widget(object):
         except:
             raise TypeError('Cannot cast as String')
 
-        # Checks device_key for type int
+        # Checks device_key for type str
         try:
-            self.device_key = int(data.get('device_key', None))
+            self.device_key = str(data.get('device_key', None))
         except:
-            raise TypeError('Cannot cast as int')
+            raise TypeError('Cannot cast as str')
 
 # TODO: Make this thread-safe and/or figure out what will happen when multiple requests come in simultaneously
 class DoorServer(protocol.Protocol):
