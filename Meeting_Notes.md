@@ -92,3 +92,31 @@
 	- Assigned tasks for the rest of the week.  Decided to meet Tuesday afternoon. 
 	- Branch clean moved to Tuesday 
 	
+#Feb 26
+	- Team Name - Comic Sans Intelligence : CSI
+	- Moving forward with Nick's stuff (possibly)
+	- Short meeting
+
+#Feb 29
+	- Got another email from MITRE - things are broken 
+	- Kim spent time this weekend - fixing things they said were broken
+	- email them - debug in the meantimme
+	- Due after Spring Break - paper - what we did for a project - what we did - what *I* did - Reflection (Midterm)
+	- Schedule for next section?
+
+#Mar 18
+	- Nick reviewed what him and Kim did over break
+	- They rewrote a ton of things because our widgets didn't stay saved when the device was powered down
+	- Mark will crate new image and submit 
+	- Victoria will send email to communicate how much we actually worked
+	- Reflected on the first half
+	- Got people up to speed with running the system so they can be more useful
+	- Coming up with plan 
+	- Bought new CC/Keypad - will use BBB from Erin 
+	##Priorities 
+		- BBB Training Session (tools & understanding)
+		- Two Subgroups (another meeting time agreed upon)
+		- Regroup on Fridays (discuss and merge)
+		- Throughout all - Maintain Communication - Github Issues for Technical Issues 
+	- Monday - Skype meeting w/Potter - Erin has WVA Room 
+	
