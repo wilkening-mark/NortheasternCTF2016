@@ -120,9 +120,11 @@
 		- Throughout all - Maintain Communication - Github Issues for Technical Issues 
 	- Monday - Skype meeting w/Potter - Erin has WVA Room 
 	
-#Mar 21
+#Mar 21 AM
 	- Morning: Skype meeting with Prof Potter
-	- Erin stuff?
+	- Erin has this stuff
+	
+#Mar 21 PM
 	- Evening: Organizational meeting
 	- Everyone but Sam & Mark
 	- Formed 2 subteams with approx times:
