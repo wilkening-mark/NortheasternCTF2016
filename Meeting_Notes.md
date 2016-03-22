@@ -120,3 +120,15 @@
 		- Throughout all - Maintain Communication - Github Issues for Technical Issues 
 	- Monday - Skype meeting w/Potter - Erin has WVA Room 
 	
+#Mar 21
+	- Morning: Skype meeting with Prof Potter
+	- Erin stuff?
+	- Evening: Organizational meeting
+	- Everyone but Sam & Mark
+	- Formed 2 subteams with approx times:
+		- Monday 6-9pm: Erin, Nick, Kim, Sam
+		- Thursday 6-9pm: Victoria, Emily, Mark, Ben
+	- Beaglebone training Friday during meeting
+	- Github Issues training Friday during meeting?
+	- Divided some of the attacks we've come up with (see brainstorm sesh doc)
+	- Most issues will need to be found only once we have the opposing team's setup
