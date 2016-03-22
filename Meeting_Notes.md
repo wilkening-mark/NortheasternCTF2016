@@ -122,7 +122,15 @@
 	
 #Mar 21 AM
 	- Morning: Skype meeting with Prof Potter
-	- Erin has this stuff
+	- Everyone but Emily & Sam
+	- We chatted with Prof Potter about notes on first half
+	- Biggest problem was with communication - we can fix this
+	- Moving forward - start meetings with "what can we do better"
+	- By tonight (3/21) split up groups for two separate teams
+	- Continue to meet Fridays/Mondays, this extra time will be used to get work done
+	- Using GitHub Issues moving forward
+	- Also discussed the work done by Nick, Kim to get system in to MITRE
+	- Basically just waiting for MITRE to send us another system (And confirm ours is fixed)
 	
 #Mar 21 PM
 	- Evening: Organizational meeting
@@ -130,7 +138,7 @@
 	- Formed 2 subteams with approx times:
 		- Monday 6-9pm: Erin, Nick, Kim, Sam
 		- Thursday 6-9pm: Victoria, Emily, Mark, Ben
-	- Beaglebone training Friday during meeting
+	- Beaglebone training Thursday during meeting - in WVA
 	- Github Issues training Friday during meeting?
 	- Divided some of the attacks we've come up with (see brainstorm sesh doc)
 	- Most issues will need to be found only once we have the opposing team's setup
