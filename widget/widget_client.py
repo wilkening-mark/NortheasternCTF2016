@@ -61,7 +61,7 @@ class ServerConnection(object):
     def __init__(self, logger):
         self.logger = logger
         self.conn = None
-        with open (".data", "r") as myfile:
+        with open ("/usr/local/bin/.data", "r") as myfile:
             self.device_id = str(myfile.readline()).strip()
 
     def connect(self):
