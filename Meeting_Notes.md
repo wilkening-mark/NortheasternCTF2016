@@ -142,3 +142,25 @@
 	- Github Issues training Friday during meeting?
 	- Divided some of the attacks we've come up with (see brainstorm sesh doc)
 	- Most issues will need to be found only once we have the opposing team's setup
+
+#Mar 24 PM 
+	- BBB training 
+	- Notes on Drive
+	- Have three BBB, one is missing the Mini-USB connector on the bd
+
+#Mar 25
+	- Got system (and we made it to the attack phase!!!!!!!!)
+	- Git Issues - for Code/project problems
+	- Code problems that need to be fixed or Project 
+	- Opened example Issue on Git 
+	- Expectations : 
+		- Preferred Communication Platform - (is it not fb? what is it?)
+		- Be responsive on ^^ 
+		- Take this as a learning and teaching opportunity 
+		- Don't be afraid to ask the questions if you don't know
+		- Be actively involved 
+		- Be respectful of people's time (be on time - communicate)
+	- Reminder of approx times:
+		- Monday 6-9pm: Erin, Nick, Kim, Sam
+		- Thursday 6-9pm: Victoria, Emily, Mark, Ben
+	- For Monday AM : Look at system(s) and open issues, incl research on attacks (general, specific to the system)
