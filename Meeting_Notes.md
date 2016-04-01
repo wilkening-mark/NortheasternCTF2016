@@ -164,3 +164,17 @@
 		- Monday 6-9pm: Erin, Nick, Kim, Sam
 		- Thursday 6-9pm: Victoria, Emily, Mark, Ben
 	- For Monday AM : Look at system(s) and open issues, incl research on attacks (general, specific to the system)
+
+#Apr 1
+	- Sent email to MITRE about on campus (tentatively next Fri)
+	- Emily Skyped in 
+	- Got Master Password from System 2
+	- We should be able to read the packet?
+	- Make image where we know txt file (Sys2)
+	- Sent email to register the widget for sys2
+	- Mark "This is going to be so easy"
+	- Each group will come up with a write-up during next week's meetings
+	- Got some good thoughts and good ideas for both systems
+	- Waiting for registration requests to be approved
+	- Still can't get the system 1 to flash
+	
