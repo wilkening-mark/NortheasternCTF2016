@@ -1,0 +1,13 @@
+#!/bin/bash
+# Script that runs on startup, should be linked in /etc/init.d
+#
+# Changes date and then creates a random device key on first boot - put in program_avr.sh
+
+date -s "24 FEB 2016 18:00:00"
+
+if [ -f /etc/first-boot.txt ];then
+  touch /etc/device_key.txt
+  echo $RANDOM$RANDOM$RANDOM > /etc/device_key.txt
+  rm /etc/first-boot.txt
+
+fi
