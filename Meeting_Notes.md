@@ -177,4 +177,19 @@
 	- Got some good thoughts and good ideas for both systems
 	- Waiting for registration requests to be approved
 	- Still can't get the system 1 to flash
+
+#Apr 8 
+	- 3 write-ups allowed (no more than 2 pages)
+	- got two widgets - giving back one
+	- tried to get cloning but they hadn't changed the flag
+
+#Apr 11
+	- Prof Potter will proofread stuff 
+	- headed into the final week 
+	- meeting later
+
+#Apr 11 PM
+	- Finished first two writeups
+	- Sent off to Prof Potter for proofreading
+	- decided on timestamp for 3rd write up
 	
